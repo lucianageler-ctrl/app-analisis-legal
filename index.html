@@ -865,7 +865,70 @@
       toast(`Procesando ${incomingFiles.length} archivo(s)...`);
       for (const file of incomingFiles) {
         try {
-          const payload = await extractFilePayload(file);
+          let payload;
+
+if (file.type === "application/pdf") {
+  toast(`Procesando PDF: ${file.name}...`);
+
+  // intentar lectura normal
+  let text = "";
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      const strings = content.items.map(item => item.str);
+      text += strings.join(" ") + "\n";
+    }
+  } catch (err) {
+    console.error("Error leyendo PDF normal:", err);
+  }
+
+  // si hay poco texto → usar OCR
+  if (!text || text.trim().length < 100) {
+    toast(`PDF escaneado detectado. Aplicando OCR...`);
+
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+      let ocrText = "";
+
+      for (let i = 1; i <= pdf.numPages; i++) {
+        toast(`OCR página ${i}/${pdf.numPages}...`);
+
+        const page = await pdf.getPage(i);
+        const viewport = page.getViewport({ scale: 2 });
+
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+
+        await page.render({
+          canvasContext: context,
+          viewport: viewport
+        }).promise;
+
+        const result = await Tesseract.recognize(canvas, "spa");
+        ocrText += result.data.text + "\n";
+      }
+
+      text = ocrText;
+
+    } catch (err) {
+      console.error("Error OCR:", err);
+      text = "[No se pudo extraer texto del PDF]";
+    }
+  }
+
+  payload = { text };
+
+} else {
+  payload = await extractFilePayload(file);
+}
           addDoc(createDoc({
             label: file.name.replace(/\.[^.]+$/, ''),
             role: state.docs.length === 0 ? 'original' : 'version',
@@ -1250,5 +1313,9 @@
     }
     init();
   </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.3.136/pdf.min.js"></script>
+<script src="https://unpkg.com/tesseract.js@5/dist/tesseract.min.js"></script>
+
 </body>
 </html>
