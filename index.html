@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plataforma de Evolución Normativa y Análisis Estratégico</title>
+  <style>
+    :root {
+      --bg: #07111f;
+      --bg2: #0d1b2f;
+      --panel: rgba(16, 34, 58, 0.94);
+      --line: rgba(160, 197, 255, 0.14);
+      --text: #edf4ff;
+      --muted: #a9bfdc;
+      --cyan: #55d6ff;
+      --blue: #4f8cff;
+      --green: #2ad08f;
+      --red: #ff6482;
+      --amber: #ffbf5e;
+      --purple: #a98bff;
+      --shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+      --radius: 20px;
+      --transition: 180ms ease;
+      --font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      color: var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(85,214,255,.14), transparent 28%),
+        radial-gradient(circle at top left, rgba(79,140,255,.12), transparent 30%),
+        linear-gradient(180deg, #07111f 0%, #091628 100%);
+      min-height: 100vh;
+    }
+    button, input, select, textarea { font: inherit; }
+    .app { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+    .sidebar {
+      position: sticky; top: 0; height: 100vh; padding: 24px 18px;
+      border-right: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(7,17,31,.96), rgba(10,22,39,.92));
+    }
+    .brand {
+      display: flex; gap: 14px; align-items: center; padding: 12px;
+      border-radius: 18px; background: rgba(255,255,255,.03); border: 1px solid var(--line);
+      box-shadow: var(--shadow); margin-bottom: 22px;
+    }
+    .brand-badge {
+      width: 44px; height: 44px; border-radius: 14px;
+      display: grid; place-items: center; font-weight: 800; color: #031220;
+      background: linear-gradient(135deg, var(--cyan), var(--blue));
+    }
+    .brand h1 { margin: 0; font-size: 15px; }
+    .brand p { margin: 4px 0 0; font-size: 12px; color: var(--muted); }
+    .nav { display: grid; gap: 10px; }
+    .nav a {
+      color: var(--muted); text-decoration: none; padding: 12px 14px; border-radius: 14px;
+      transition: var(--transition); border: 1px solid transparent;
+    }
+    .nav a:hover, .nav a.active {
+      color: var(--text); background: rgba(255,255,255,.04); border-color: var(--line); transform: translateX(3px);
+    }
+    .main { padding: 28px; display: grid; gap: 22px; }
+    .hero, .panel {
+      background: linear-gradient(180deg, rgba(18,40,67,.95), rgba(13,27,47,.93));
+      border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .hero { display: grid; grid-template-columns: 1.5fr .9fr; gap: 18px; padding: 28px; }
+    .eyebrow {
+      display: inline-flex; gap: 8px; align-items: center; padding: 8px 12px; border-radius: 999px;
+      border: 1px solid rgba(85,214,255,.24); background: rgba(85,214,255,.08); color: #9cecff;
+      font-size: 12px; margin-bottom: 12px;
+    }
+    .hero h2 { margin: 0; font-size: clamp(26px, 3vw, 42px); line-height: 1.02; max-width: 12ch; }
+    .hero p { color: var(--muted); line-height: 1.6; margin: 14px 0 0; }
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 18px; }
+    .btn {
+      border: 0; border-radius: 14px; padding: 12px 16px; cursor: pointer; font-weight: 600;
+      transition: var(--transition); display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn.primary { background: linear-gradient(135deg, var(--cyan), var(--blue)); color: #04101d; }
+    .btn.secondary { background: rgba(255,255,255,.04); color: var(--text); border: 1px solid var(--line); }
+    .btn.ghost { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+    .btn.danger { background: rgba(255,100,130,.12); color: #ffe0e8; border: 1px solid rgba(255,100,130,.18); }
+    .btn.small { padding: 8px 12px; font-size: 13px; border-radius: 12px; }
+    .hero-stats { display: grid; gap: 12px; }
+    .mini-card {
+      padding: 16px; border-radius: 18px; background: rgba(255,255,255,.04); border: 1px solid var(--line);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .mini-card strong { display: block; font-size: 22px; }
+    .mini-card span { color: var(--muted); font-size: 13px; }
+    .panel-header { padding: 20px 22px 12px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .panel-title h3 { margin: 0; font-size: 20px; }
+    .panel-title p { margin: 8px 0 0; color: var(--muted); line-height: 1.5; }
+    .panel-body { padding: 0 22px 22px; }
+    .grid-2 { display: grid; grid-template-columns: 1.12fr .88fr; gap: 22px; }
+    .upload-shell { display: grid; gap: 14px; }
+    .upload-hero {
+      display: grid; gap: 14px; padding: 18px; border-radius: 22px;
+      border: 1px solid rgba(134,228,255,.18);
+      background: linear-gradient(180deg, rgba(85,214,255,.07), rgba(255,255,255,.02));
+    }
+    .support-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .support-chip {
+      padding: 7px 10px; border-radius: 999px; font-size: 12px; color: #9cecff;
+      background: rgba(85,214,255,.08); border: 1px solid rgba(85,214,255,.16);
+    }
+    .dropzone {
+      border: 1.5px dashed rgba(134,228,255,.34); border-radius: 22px; padding: 28px; min-height: 220px;
+      display: grid; place-items: center; text-align: center; cursor: pointer; transition: var(--transition);
+      background: linear-gradient(180deg, rgba(7,17,31,.18), rgba(255,255,255,.025));
+    }
+    .dropzone:hover, .dropzone.dragover {
+      border-color: rgba(134,228,255,.56); background: linear-gradient(180deg, rgba(85,214,255,.12), rgba(255,255,255,.035));
+    }
+    .dropzone:focus-visible { outline: 2px solid rgba(134,228,255,.7); outline-offset: 3px; }
+    .big-icon {
+      width: 64px; height: 64px; border-radius: 18px; margin: 0 auto 12px; display: grid; place-items: center;
+      background: linear-gradient(135deg, rgba(85,214,255,.18), rgba(79,140,255,.18)); font-size: 30px;
+    }
+    .dropzone strong { display: block; font-size: 18px; }
+    .dropzone p { color: var(--muted); line-height: 1.6; max-width: 60ch; }
+    .dropzone-actions { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+    .upload-meta-grid, .upload-tools { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+    .upload-card, .doc-item, .notice, .empty, .trace-panel, .table-wrap {
+      border: 1px solid var(--line); background: rgba(255,255,255,.035); border-radius: 18px;
+    }
+    .upload-card, .trace-panel { padding: 16px; }
+    .upload-card h4, .trace-panel h4 { margin: 0 0 8px; }
+    .upload-card p, .trace-panel p, .hint, .notice { color: var(--muted); line-height: 1.55; }
+    .notice { padding: 12px 14px; margin-bottom: 14px; }
+    .field { display: grid; gap: 8px; }
+    .field label { color: var(--muted); font-size: 12px; }
+    .field input, .field select, .field textarea {
+      background: rgba(255,255,255,.045); border: 1px solid var(--line); color: var(--text);
+      border-radius: 14px; padding: 12px 14px; outline: none;
+    }
+    .field textarea { min-height: 160px; resize: vertical; }
+    .doc-list { display: grid; gap: 12px; }
+    .doc-item { padding: 16px; display: grid; gap: 12px; }
+    .doc-top { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+    .doc-meta, .doc-actions, .inline, .status-bar, .timeline-stats { display: flex; gap: 8px; flex-wrap: wrap; }
+    .pill, .status-chip, .stat-dot, .mod-tag {
+      display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; font-size: 12px;
+    }
+    .pill.original { background: rgba(85,214,255,.14); color: #a8eeff; border: 1px solid rgba(85,214,255,.2); }
+    .pill.version { background: rgba(79,140,255,.14); color: #dce8ff; border: 1px solid rgba(79,140,255,.2); }
+    .pill.updated { background: rgba(42,208,143,.14); color: #defef1; border: 1px solid rgba(42,208,143,.2); }
+    .pill.warn { background: rgba(255,191,94,.14); color: #ffeed0; border: 1px solid rgba(255,191,94,.2); }
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px; }
+    .kpi {
+      background: rgba(255,255,255,.04); border: 1px solid var(--line); border-radius: 18px; padding: 18px;
+    }
+    .kpi .label { color: var(--muted); font-size: 13px; }
+    .kpi .value { font-size: 30px; font-weight: 800; margin-top: 8px; }
+    .kpi .sub { font-size: 12px; color: var(--muted); margin-top: 8px; }
+    .timeline { display: grid; gap: 12px; }
+    .timeline-item {
+      border: 1px solid var(--line); background: rgba(255,255,255,.03); border-radius: 18px; padding: 16px; display: grid; gap: 12px;
+    }
+    .timeline-head { display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+    .stat-add { background: rgba(42,208,143,.15); color: #d8fff0; }
+    .stat-del { background: rgba(255,100,130,.15); color: #ffe2e8; }
+    .stat-mod { background: rgba(255,191,94,.15); color: #ffeccc; }
+    .stat-ren { background: rgba(169,139,255,.15); color: #efe9ff; }
+    .toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .toolbar .field { min-width: 160px; flex: 1; }
+    .toolbar .field.search { min-width: 260px; flex: 2; }
+    .table-wrap { overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td {
+      padding: 14px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid rgba(160,197,255,.1); font-size: 14px;
+    }
+    th {
+      position: sticky; top: 0; background: #10223a; z-index: 2; font-size: 12px;
+      text-transform: uppercase; letter-spacing: .04em; color: var(--muted); cursor: pointer;
+    }
+    tbody tr:hover { background: rgba(255,255,255,.04); }
+    tbody tr.is-sensitive { box-shadow: inset 3px 0 0 var(--red); }
+    .mod-add { background: rgba(42,208,143,.14); color: #dcfff2; border: 1px solid rgba(42,208,143,.2); }
+    .mod-del { background: rgba(255,100,130,.14); color: #ffe3ea; border: 1px solid rgba(255,100,130,.2); }
+    .mod-main { background: rgba(255,191,94,.14); color: #ffeed0; border: 1px solid rgba(255,191,94,.2); }
+    .mod-ren { background: rgba(169,139,255,.14); color: #f0ebff; border: 1px solid rgba(169,139,255,.2); }
+    .mod-other { background: rgba(79,140,255,.14); color: #e2ecff; border: 1px solid rgba(79,140,255,.2); }
+    .expand-btn {
+      background: rgba(255,255,255,.04); border: 1px solid var(--line); color: var(--text); border-radius: 10px; padding: 8px 10px; cursor: pointer;
+    }
+    .details-row { display: none; }
+    .details-row.open { display: table-row; }
+    .details-box { padding: 18px; background: rgba(5,14,24,.32); border-radius: 14px; display: grid; gap: 14px; }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .quote-card {
+      border: 1px solid var(--line); border-radius: 14px; padding: 14px; background: rgba(255,255,255,.03);
+    }
+    .quote-card h4 { margin: 0 0 10px; font-size: 13px; color: var(--muted); text-transform: uppercase; }
+    .quote-card p { margin: 0; line-height: 1.6; }
+    .split { display: grid; grid-template-columns: 1fr 360px; gap: 22px; align-items: start; }
+    .trace-panel { position: sticky; top: 18px; min-height: 260px; }
+    .trace-block, .bar-list, .accordion { display: grid; gap: 12px; }
+    .trace-mini, .acc-item {
+      background: rgba(255,255,255,.04); border: 1px solid var(--line); border-radius: 14px;
+    }
+    .trace-mini { padding: 12px; }
+    .acc-item { overflow: hidden; }
+    .acc-btn {
+      width: 100%; border: 0; background: transparent; color: var(--text); padding: 16px;
+      display: flex; justify-content: space-between; gap: 16px; align-items: center; text-align: left; cursor: pointer;
+    }
+    .acc-content { display: none; padding: 0 16px 16px; color: var(--muted); line-height: 1.7; }
+    .acc-item.open .acc-content { display: block; }
+    .bar-item { display: grid; gap: 8px; }
+    .bar-row { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 13px; }
+    .bar-track { height: 12px; background: rgba(255,255,255,.06); border-radius: 999px; overflow: hidden; }
+    .bar-fill { height: 100%; background: linear-gradient(90deg, var(--cyan), var(--blue)); }
+    .footer { color: var(--muted); text-align: center; font-size: 12px; padding: 8px 6px 18px; }
+    .empty { padding: 24px; text-align: center; color: var(--muted); }
+    .toast-wrap { position: fixed; right: 18px; bottom: 18px; display: grid; gap: 10px; z-index: 1000; }
+    .toast {
+      background: rgba(9,22,40,.96); border: 1px solid var(--line); color: var(--text); padding: 12px 14px;
+      border-radius: 14px; min-width: 260px; box-shadow: var(--shadow);
+    }
+    .hidden { display: none !important; }
+    @media (max-width: 1240px) {
+      .hero, .grid-2, .split { grid-template-columns: 1fr; }
+      .kpi-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .trace-panel { position: static; }
+    }
+    @media (max-width: 980px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+      .main { padding: 18px; }
+    }
+    @media (max-width: 720px) {
+      .upload-meta-grid, .upload-tools, .detail-grid, .kpi-grid { grid-template-columns: 1fr; }
+      .toolbar { flex-direction: column; }
+      .panel-header, .panel-body { padding-left: 16px; padding-right: 16px; }
+      th:nth-child(5), td:nth-child(5), th:nth-child(6), td:nth-child(6), th:nth-child(7), td:nth-child(7) { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-badge">NE</div>
+        <div>
+          <h1>Plataforma de Evolución Normativa</h1>
+          <p>Análisis estratégico y trazabilidad documental</p>
+        </div>
+      </div>
+      <nav class="nav">
+        <a href="#workspace" class="active">Workspace</a>
+        <a href="#evolucion">Evolución</a>
+        <a href="#matriz">Matriz</a>
+        <a href="#sintesis">Síntesis</a>
+        <a href="#trazabilidad">Trazabilidad</a>
+        <a href="#metodo">Método</a>
+      </nav>
+      <div class="status-bar" style="margin-top:22px;">
+        <div class="status-chip" id="statusDocs">0 documentos</div>
+        <div class="status-chip" id="statusAnalysis">Análisis pendiente</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section class="hero">
+        <div>
+          <div class="eyebrow">Legal-tech / Gov-tech · Workspace reutilizable</div>
+          <h2>Evolución normativa con lectura estratégica y trazabilidad visible</h2>
+          <p>Cargá el proyecto original y sus versiones modificadas, reemplazá archivos cuando quieras, reordená versiones y volvé a ejecutar el análisis sin romper la experiencia.</p>
+          <div class="hero-actions">
+            <button class="btn primary" id="runAnalysisBtn">Ejecutar / actualizar análisis</button>
+            <button class="btn secondary" id="loadDemoBtn">Cargar demo</button>
+            <button class="btn ghost" id="clearWorkspaceBtn">Limpiar workspace</button>
+          </div>
+        </div>
+        <div class="hero-stats">
+          <div class="mini-card"><div><span>Documentos cargados</span><strong id="heroDocs">0</strong></div><span>Workspace local</span></div>
+          <div class="mini-card"><div><span>Cambios detectados</span><strong id="heroChanges">0</strong></div><span>Matriz dinámica</span></div>
+          <div class="mini-card"><div><span>Artículos impactados</span><strong id="heroArticles">0</strong></div><span>Difusión interna</span></div>
+        </div>
+      </section>
+
+      <section id="workspace" class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <h3>1. Módulo de carga y gestión de archivos</h3>
+            <p>Admite carga por archivo o pegado de texto. Cuando un campo no puede inferirse del texto, la interfaz muestra <strong>[N/D]</strong> o <strong>[DATO NO DISPONIBLE EN EL TEXTO]</strong>.</p>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="grid-2">
+            <div class="upload-shell">
+              <div class="upload-hero">
+                <div class="support-chips">
+                  <span class="support-chip">TXT</span>
+                  <span class="support-chip">MD</span>
+                  <span class="support-chip">HTML</span>
+                  <span class="support-chip">JSON</span>
+                  <span class="support-chip">PDF</span>
+                  <span class="support-chip">DOCX</span>
+                  <span class="support-chip">DOC</span>
+                </div>
+                <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Subir archivos legislativos">
+                  <div>
+                    <div class="big-icon">⬆</div>
+                    <strong>Subí documentos legislativos en un solo paso</strong>
+                    <p>Arrastrá y soltá archivos o hacé clic para seleccionar. La app intenta leer TXT/MD/HTML/JSON de forma nativa y PDF/DOCX con librerías cargadas dinámicamente. Si un archivo no puede procesarse, queda incorporado con un aviso claro en vez de romper la app.</p>
+                    <div class="dropzone-actions">
+                      <button type="button" class="btn primary" id="selectFilesBtn">Seleccionar archivos</button>
+                      <span class="btn secondary" style="pointer-events:none;">Drag &amp; drop habilitado</span>
+                    </div>
+                  </div>
+                </div>
+                <input type="file" id="fileInput" class="hidden" multiple accept=".txt,.md,.html,.json,.pdf,.doc,.docx,text/plain,text/markdown,application/json,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+                <div class="upload-meta-grid">
+                  <div class="upload-card">
+                    <h4>Lectura robusta</h4>
+                    <p>Se corrigió la lógica de lectura para que nunca falle toda la carga por un solo archivo. Ahora cada documento se procesa por separado y siempre se agrega al workspace con su estado correspondiente.</p>
+                  </div>
+                  <div class="upload-card">
+                    <h4>Fallback seguro</h4>
+                    <p>Si PDF, DOCX o DOC no pueden extraerse correctamente en el navegador, el sistema muestra un texto de fallback y marca el archivo como “lectura parcial / no disponible”, sin romper la experiencia.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="upload-card">
+                <h4>Carga manual o edición rápida</h4>
+                <p>Útil para pegar una versión corregida, un artículo aislado o una transcripción cuando todavía no tenés el archivo final.</p>
+                <div class="upload-tools">
+                  <div class="field">
+                    <label>Etiqueta visual</label>
+                    <input id="manualLabel" type="text" placeholder="Ej. Proyecto original / V2 / Comisión" />
+                  </div>
+                  <div class="field">
+                    <label>Rol documental</label>
+                    <select id="manualRole">
+                      <option value="original">Proyecto original</option>
+                      <option value="version">Versión posterior</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label>Fecha / ID</label>
+                    <input id="manualDate" type="text" placeholder="Ej. 2026-03-20 / Exp. 114-D-2026" />
+                  </div>
+                  <div class="field">
+                    <label>Descripción breve</label>
+                    <input id="manualDesc" type="text" placeholder="Ej. Texto con cambios de comisión" />
+                  </div>
+                </div>
+                <div class="field" style="margin-top:12px;">
+                  <label>Pegar texto legislativo</label>
+                  <textarea id="manualText" placeholder="Pegá aquí el contenido completo. Recomendado: mantener estructura por Artículo / Art. / ARTÍCULO para una comparación más precisa."></textarea>
+                </div>
+                <div class="inline" style="margin-top:12px; justify-content:space-between; align-items:flex-start;">
+                  <button class="btn secondary" id="addManualBtn">Agregar texto al workspace</button>
+                  <span class="hint" style="max-width:44ch;">Consejo: para mejores resultados, ordená los documentos desde la versión base hasta la última modificación y mantené fechas o IDs visibles.</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="notice"><strong>Cómo funciona el análisis</strong><br>La app separa artículos por patrones como “Artículo 1”, “Art. 1”, “ARTÍCULO 1°”. Luego compara pares consecutivos para detectar agregado, eliminado, modificado, renumerado y cambios internos cuando hay señales textuales explícitas.</div>
+              <div class="doc-list" id="docList"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="evolucion" class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <h3>2. Panel de evolución normativa</h3>
+            <p>Vista ejecutiva de cómo cambia el proyecto entre versiones.</p>
+          </div>
+          <div class="field" style="min-width:180px;">
+            <label>Filtrar por versión</label>
+            <select id="timelineFilter"></select>
+          </div>
+        </div>
+        <div class="panel-body"><div class="timeline" id="timeline"></div></div>
+      </section>
+
+      <section id="matriz" class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <h3>3. Matriz detallada de modificaciones</h3>
+            <p>Podés filtrar, buscar, ordenar y expandir detalles con cita obligatoria.</p>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="toolbar">
+            <div class="field search"><label>Buscar por artículo o palabra clave</label><input id="searchInput" type="text" placeholder="Ej. 4, plataformas, vigencia" /></div>
+            <div class="field"><label>Tipo de modificación</label><select id="typeFilter"></select></div>
+            <div class="field"><label>Categoría temática</label><select id="categoryFilter"></select></div>
+            <div class="field"><label>Sensibilidad</label><select id="sensitiveFilter"><option value="all">Todos</option><option value="yes">Sensibles</option><option value="no">No sensibles</option></select></div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th data-sort="article">Art.</th>
+                  <th data-sort="type">Tipo de modificación</th>
+                  <th data-sort="category">Categoría temática</th>
+                  <th data-sort="description">Descripción del cambio</th>
+                  <th data-sort="legalImpact">Impacto jurídico</th>
+                  <th data-sort="practicalImpact">Impacto práctico</th>
+                  <th data-sort="politicalImpact">Impacto político</th>
+                  <th>Cita obligatoria</th>
+                  <th>Detalle</th>
+                </tr>
+              </thead>
+              <tbody id="matrixBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="sintesis" class="panel">
+        <div class="panel-header"><div class="panel-title"><h3>4. Panel de síntesis estratégica</h3><p>Indicadores y ranking de focos críticos.</p></div></div>
+        <div class="panel-body">
+          <div class="kpi-grid" id="kpiGrid"></div>
+          <div class="split" style="margin-top:18px;">
+            <div class="accordion" id="summaryAccordion"></div>
+            <aside class="trace-panel">
+              <h4>Vista rápida</h4>
+              <p>Seleccioná un cambio desde la matriz para ver su trazabilidad esencial.</p>
+              <div id="selectedTrace" class="trace-block"><div class="trace-mini"><strong>Sin selección</strong><p style="margin-top:8px;">Elegí una fila para inspeccionar la cita obligatoria y los impactos asociados.</p></div></div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section id="trazabilidad" class="panel">
+        <div class="panel-header"><div class="panel-title"><h3>5. Citas y trazabilidad documental</h3><p>Registro ordenado de las citas obligatorias.</p></div></div>
+        <div class="panel-body" id="traceabilityList"></div>
+      </section>
+
+      <section id="metodo" class="panel">
+        <div class="panel-header"><div class="panel-title"><h3>Método y límites del análisis</h3><p>Transparencia metodológica para uso jurídico, legislativo o técnico.</p></div></div>
+        <div class="panel-body">
+          <div class="notice"><strong>Regla fundamental</strong><br>Esta aplicación se basa únicamente en los textos cargados por el usuario. No inventa información, no usa doctrina, no incorpora normas externas ni completa vacíos con conocimiento general.</div>
+          <div class="bar-list" id="methodBars"></div>
+        </div>
+      </section>
+
+      <div class="footer">Plataforma de Evolución Normativa · Workspace local en navegador · HTML + CSS + JavaScript</div>
+    </main>
+  </div>
+
+  <div class="toast-wrap" id="toastWrap"></div>
+
+  <script>
+    const STORAGE_KEY = 'normative-evolution-workspace-v3';
+    const FALLBACK_UNAVAILABLE = '[DATO NO DISPONIBLE EN EL TEXTO]';
+    const MOD_TYPES = [
+      'Artículo agregado','Artículo eliminado','Artículo modificado (contenido)','Artículo renumerado','Cambio en inciso/párrafo','Cambio en sujetos alcanzados/excluidos','Cambio en obligaciones o derechos','Cambio en porcentajes, montos o condiciones','Cambio en autoridad de aplicación','Cambio en vigencia o implementación','Cambio en definición clave'
+    ];
+    const CATEGORIES = [
+      'Laboral individual','Sindical/colectivo','Seguridad social','Justicia laboral/procedimiento','Fiscal/tributario','Regulación de plataformas','Formalización laboral','Técnico/redacción','Otro (especificar)'
+    ];
+
+    const state = {
+      docs: [],
+      analysis: { changes: [], timeline: [], summary: null },
+      sort: { key: 'article', dir: 'asc' },
+      selectedChangeId: null,
+      loaders: { pdfjs: null, mammoth: null }
+    };
+
+    const $ = (s) => document.querySelector(s);
+    const $$ = (s) => Array.from(document.querySelectorAll(s));
+    const uid = () => Math.random().toString(36).slice(2, 10);
+
+    function escapeHtml(str) {
+      return String(str ?? '').replace(/[&<>"']/g, (m) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+    }
+    function escapeAttr(str) { return escapeHtml(str).replace(/`/g, '&#96;'); }
+
+    function toast(message) {
+      const wrap = $('#toastWrap');
+      const el = document.createElement('div');
+      el.className = 'toast';
+      el.textContent = message;
+      wrap.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(10px)';
+        setTimeout(() => el.remove(), 180);
+      }, 2600);
+    }
+
+    function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify({ docs: state.docs })); }
+    function loadState() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      try {
+        const parsed = JSON.parse(raw);
+        state.docs = Array.isArray(parsed.docs) ? parsed.docs : [];
+      } catch (_) {}
+    }
+
+    function normalizeText(text) {
+      return String(text || '').replace(/\r/g, '').replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
+    }
+    function excerpt(text, max = 220) {
+      const clean = String(text || '').replace(/\s+/g, ' ').trim();
+      if (!clean) return FALLBACK_UNAVAILABLE;
+      return clean.length > max ? clean.slice(0, max).trim() + '…' : clean;
+    }
+    function unavailableMessage(fileName, extra = '') {
+      return `${FALLBACK_UNAVAILABLE}\n\nArchivo: ${fileName}. ${extra || 'No se pudo extraer el contenido con claridad en este navegador.'}`;
+    }
+
+    function readAsText(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ''));
+        reader.onerror = () => reject(new Error('Error al leer archivo como texto'));
+        reader.readAsText(file, 'utf-8');
+      });
+    }
+    function readAsArrayBuffer(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error('Error al leer archivo como binario'));
+        reader.readAsArrayBuffer(file);
+      });
+    }
+
+    function loadScript(src, testFn) {
+      return new Promise((resolve, reject) => {
+        if (testFn()) return resolve();
+        const existing = document.querySelector(`script[data-src="${src}"]`);
+        if (existing) {
+          existing.addEventListener('load', () => resolve(), { once: true });
+          existing.addEventListener('error', () => reject(new Error(`No se pudo cargar ${src}`)), { once: true });
+          return;
+        }
+        const script = document.createElement('script');
+        script.src = src;
+        script.async = true;
+        script.dataset.src = src;
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error(`No se pudo cargar ${src}`));
+        document.head.appendChild(script);
+      });
+    }
+
+    async function ensurePdfJs() {
+      if (window.pdfjsLib) return window.pdfjsLib;
+      if (!state.loaders.pdfjs) {
+        state.loaders.pdfjs = loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.3.136/pdf.min.js', () => !!window.pdfjsLib)
+          .then(() => {
+            if (window.pdfjsLib?.GlobalWorkerOptions) {
+              window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.3.136/pdf.worker.min.js';
+            }
+            return window.pdfjsLib;
+          });
+      }
+      return state.loaders.pdfjs;
+    }
+
+    async function ensureMammoth() {
+      if (window.mammoth) return window.mammoth;
+      if (!state.loaders.mammoth) {
+        state.loaders.mammoth = loadScript('https://unpkg.com/mammoth@1.8.0/mammoth.browser.min.js', () => !!window.mammoth)
+          .then(() => window.mammoth);
+      }
+      return state.loaders.mammoth;
+    }
+
+    function extractReadableTextFromBinary(buffer) {
+      try {
+        const bytes = new Uint8Array(buffer);
+        let ascii = '';
+        for (let i = 0; i < bytes.length; i++) ascii += String.fromCharCode(bytes[i]);
+        const chunks = ascii.match(/[A-Za-zÁÉÍÓÚáéíóúÑñÜü0-9 ,.;:()\-_/]{6,}/g) || [];
+        return normalizeText(chunks.join(' '));
+      } catch (_) {
+        return '';
+      }
+    }
+
+    async function extractTextFromPdf(file) {
+      try {
+        const pdfjsLib = await ensurePdfJs();
+        const arrayBuffer = await readAsArrayBuffer(file);
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        let text = '';
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+          const page = await pdf.getPage(pageNum);
+          const content = await page.getTextContent();
+          text += '\n\n' + content.items.map((item) => item.str).join(' ');
+        }
+        const cleaned = normalizeText(text);
+        if (cleaned) return { text: cleaned, status: 'ok', note: 'PDF leído correctamente' };
+      } catch (err) {
+        console.warn('Fallo lectura PDF avanzada', err);
+      }
+      const raw = extractReadableTextFromBinary(await readAsArrayBuffer(file));
+      if (raw) return { text: raw, status: 'partial', note: 'PDF leído parcialmente con extracción básica' };
+      return { text: unavailableMessage(file.name, 'PDF sin texto seleccionable o no compatible.'), status: 'unavailable', note: 'PDF no legible' };
+    }
+
+    async function extractTextFromDocx(file) {
+      try {
+        const mammoth = await ensureMammoth();
+        const arrayBuffer = await readAsArrayBuffer(file);
+        const result = await mammoth.extractRawText({ arrayBuffer });
+        const cleaned = normalizeText(result.value || '');
+        if (cleaned) return { text: cleaned, status: 'ok', note: 'DOCX leído correctamente' };
+      } catch (err) {
+        console.warn('Fallo lectura DOCX avanzada', err);
+      }
+      const raw = extractReadableTextFromBinary(await readAsArrayBuffer(file));
+      if (raw) return { text: raw, status: 'partial', note: 'DOCX leído parcialmente con extracción básica' };
+      return { text: unavailableMessage(file.name, 'DOCX no compatible o sin contenido recuperable.'), status: 'unavailable', note: 'DOCX no legible' };
+    }
+
+    async function extractTextFromDoc(file) {
+      try {
+        const text = normalizeText(await readAsText(file));
+        if (text && /[A-Za-zÁÉÍÓÚáéíóúÑñÜü]{3,}/.test(text)) {
+          return { text, status: 'partial', note: 'DOC leído en modo compatible' };
+        }
+      } catch (err) {
+        console.warn('Fallo lectura DOC texto', err);
+      }
+      const raw = extractReadableTextFromBinary(await readAsArrayBuffer(file));
+      if (raw) return { text: raw, status: 'partial', note: 'DOC leído parcialmente con extracción básica' };
+      return { text: unavailableMessage(file.name, 'El formato DOC legado no pudo extraerse con claridad en navegador.'), status: 'unavailable', note: 'DOC no legible' };
+    }
+
+    async function extractFilePayload(file) {
+      const ext = (file.name.split('.').pop() || '').toLowerCase();
+      if (['txt', 'md', 'html', 'json'].includes(ext)) {
+        const text = normalizeText(await readAsText(file));
+        return { text: text || unavailableMessage(file.name, 'Archivo vacío.'), status: text ? 'ok' : 'unavailable', note: text ? 'Texto leído correctamente' : 'Archivo vacío' };
+      }
+      if (ext === 'pdf') return extractTextFromPdf(file);
+      if (ext === 'docx') return extractTextFromDocx(file);
+      if (ext === 'doc') return extractTextFromDoc(file);
+      try {
+        const text = normalizeText(await readAsText(file));
+        if (text) return { text, status: 'ok', note: 'Archivo leído como texto' };
+      } catch (_) {}
+      return { text: unavailableMessage(file.name, 'Formato no soportado para extracción automática.'), status: 'unavailable', note: 'Formato no soportado' };
+    }
+
+    function parseArticles(text) {
+      const source = normalizeText(text);
+      if (!source) return [];
+      const regex = /(?:^|\n)\s*(ART[IÍ]CULO|Art\.?|Artículo)\s+([0-9]+(?:°|º)?|[A-Z])\s*[:.-]?/gim;
+      const matches = [...source.matchAll(regex)];
+      if (!matches.length) return [{ number: 'Texto completo', title: 'Texto completo', content: source }];
+      const articles = [];
+      for (let i = 0; i < matches.length; i++) {
+        const current = matches[i];
+        const start = current.index;
+        const end = i + 1 < matches.length ? matches[i + 1].index : source.length;
+        articles.push({ number: String(current[2]).replace(/[°º]/g, ''), title: current[0].trim(), content: source.slice(start, end).trim() });
+      }
+      return articles;
+    }
+
+    function inferCategory(text) {
+      const t = String(text || '').toLowerCase();
+      if (!t) return 'Otro (especificar)';
+      if (/plataforma|reparto|app|aplicaci[oó]n|algoritm/.test(t)) return 'Regulación de plataformas';
+      if (/aporte|contribuci[oó]n|tribut|impuesto|fiscal|al[ií]cuota/.test(t)) return 'Fiscal/tributario';
+      if (/seguridad social|jubil|obra social|pensi[oó]n|prestaci[oó]n/.test(t)) return 'Seguridad social';
+      if (/sindicat|paritaria|convenio colectivo|huelga|delegad/.test(t)) return 'Sindical/colectivo';
+      if (/juicio|procedimiento|competencia|tribunal|justicia|proceso|demanda/.test(t)) return 'Justicia laboral/procedimiento';
+      if (/registraci[oó]n|formalizaci[oó]n|blanqueo|empleo no registrado/.test(t)) return 'Formalización laboral';
+      if (/empleador|trabajador|contrato|jornada|licencia|despido|salario|remuneraci[oó]n/.test(t)) return 'Laboral individual';
+      if (/def[ií]nase|enti[eé]ndase|se entiende/.test(t)) return 'Técnico/redacción';
+      return 'Otro (especificar)';
+    }
+
+    function detectSubtypes(before, after) {
+      const combo = `${String(before || '').toLowerCase()} ${String(after || '').toLowerCase()}`;
+      const items = [];
+      if (/inciso|p[áa]rrafo/.test(combo)) items.push('Cambio en inciso/párrafo');
+      if (/trabajador|empleador|persona humana|persona jur[ií]dica|sujeto|alcanzad|excluid/.test(combo)) items.push('Cambio en sujetos alcanzados/excluidos');
+      if (/deber[aá]|deber[aá]n|obligaci[oó]n|derecho|prohib/.test(combo)) items.push('Cambio en obligaciones o derechos');
+      if (/%|por ciento|monto|importe|tope|suma|plazo|condici[oó]n|d[ií]a[s]?|mes(?:es)?|año[s]?/.test(combo)) items.push('Cambio en porcentajes, montos o condiciones');
+      if (/autoridad de aplicaci[oó]n|ministro|ministerio|secretar[ií]a|organismo|ente/.test(combo)) items.push('Cambio en autoridad de aplicación');
+      if (/vigencia|entrada en vigencia|implementaci[oó]n|reglamentaci[oó]n|a partir/.test(combo)) items.push('Cambio en vigencia o implementación');
+      if (/def[ií]nase|enti[eé]ndase|se entiende por|definici[oó]n/.test(combo)) items.push('Cambio en definición clave');
+      return items;
+    }
+
+    function scoreImpact(change) {
+      let legal = 1, practical = 1, political = 1;
+      const text = `${change.beforeText || ''} ${change.afterText || ''}`.toLowerCase();
+      if (change.type === 'Artículo agregado' || change.type === 'Artículo eliminado') legal += 2;
+      if (change.type === 'Artículo modificado (contenido)') legal += 1;
+      if (/vigencia|autoridad de aplicaci[oó]n|competencia|sanci[oó]n|procedimiento/.test(text)) legal += 2;
+      if (/salario|jornada|contrato|registraci[oó]n|aporte|contribuci[oó]n|plataforma/.test(text)) practical += 2;
+      if (/sindicat|huelga|despido|tribut|aporte|plataforma|formalizaci[oó]n/.test(text)) political += 2;
+      if (change.category === 'Regulación de plataformas' || change.category === 'Fiscal/tributario') political += 1;
+      if (change.subtypes.includes('Cambio en sujetos alcanzados/excluidos')) { legal += 1; practical += 1; political += 1; }
+      if (change.subtypes.includes('Cambio en obligaciones o derechos')) { legal += 2; practical += 2; }
+      if (change.subtypes.includes('Cambio en vigencia o implementación')) { legal += 1; practical += 1; }
+      return { legal, practical, political, sensitive: Math.max(legal, practical, political) >= 4 };
+    }
+    function labelImpact(score) { if (score <= 1) return 'Bajo'; if (score === 2) return 'Medio'; if (score === 3) return 'Alto'; return 'Muy alto'; }
+
+    function tokenize(text) {
+      return new Set(String(text || '').toLowerCase().replace(/[^a-záéíóúñü0-9\s]/gi, ' ').split(/\s+/).filter((w) => w.length > 3));
+    }
+    function similarity(a, b) {
+      const A = tokenize(a), B = tokenize(b);
+      if (!A.size && !B.size) return 1;
+      let intersection = 0;
+      A.forEach((x) => { if (B.has(x)) intersection++; });
+      return intersection / (new Set([...A, ...B]).size || 1);
+    }
+    function countBy(list, key) {
+      return list.reduce((acc, item) => {
+        const v = item[key] || '[N/D]';
+        acc[v] = (acc[v] || 0) + 1;
+        return acc;
+      }, {});
+    }
+    function numericArticleValue(article) {
+      const match = String(article).match(/\d+/);
+      return match ? parseInt(match[0], 10) : Number.MAX_SAFE_INTEGER;
+    }
+
+    function createChange(base) {
+      const impact = scoreImpact(base);
+      return { ...base, legalImpact: labelImpact(impact.legal), practicalImpact: labelImpact(impact.practical), politicalImpact: labelImpact(impact.political), scores: impact, sensitive: impact.sensitive };
+    }
+
+    function compareVersions(baseDoc, nextDoc) {
+      const beforeArticles = parseArticles(baseDoc.text);
+      const afterArticles = parseArticles(nextDoc.text);
+      const beforeMap = new Map(beforeArticles.map((a) => [a.number, a]));
+      const afterMap = new Map(afterArticles.map((a) => [a.number, a]));
+      const changes = [];
+      const stats = { added: 0, removed: 0, modified: 0, renumbered: 0 };
+      const usedAfterKeys = new Set();
+
+      beforeArticles.forEach((before) => {
+        const match = afterMap.get(before.number);
+        if (match) {
+          usedAfterKeys.add(match.number);
+          if (normalizeText(before.content) !== normalizeText(match.content)) {
+            const subtypes = detectSubtypes(before.content, match.content);
+            changes.push(createChange({
+              id: uid(), article: before.number, type: 'Artículo modificado (contenido)', subtypes, category: inferCategory(match.content || before.content),
+              description: `Se detectó modificación textual en el artículo ${before.number} entre ${baseDoc.label} y ${nextDoc.label}.`,
+              beforeVersion: baseDoc.label, afterVersion: nextDoc.label, beforeText: before.content, afterText: match.content,
+              quote: { article: before.number, from: baseDoc.label, to: nextDoc.label, beforeExcerpt: excerpt(before.content), afterExcerpt: excerpt(match.content) }
+            }));
+            stats.modified++;
+            subtypes.forEach((sub) => {
+              changes.push(createChange({
+                id: uid(), article: before.number, type: sub, subtypes, category: inferCategory(match.content || before.content),
+                description: `Cambio específico identificado dentro del artículo ${before.number}: ${sub.toLowerCase()}.`,
+                beforeVersion: baseDoc.label, afterVersion: nextDoc.label, beforeText: before.content, afterText: match.content,
+                quote: { article: before.number, from: baseDoc.label, to: nextDoc.label, beforeExcerpt: excerpt(before.content), afterExcerpt: excerpt(match.content) }
+              }));
+            });
+          }
+          return;
+        }
+        const renumbered = afterArticles.find((after) => !usedAfterKeys.has(after.number) && similarity(before.content, after.content) > 0.86);
+        if (renumbered) {
+          usedAfterKeys.add(renumbered.number);
+          changes.push(createChange({
+            id: uid(), article: `${before.number} → ${renumbered.number}`, type: 'Artículo renumerado', subtypes: [], category: inferCategory(before.content || renumbered.content),
+            description: `El contenido del artículo ${before.number} aparece renumerado como artículo ${renumbered.number}.`,
+            beforeVersion: baseDoc.label, afterVersion: nextDoc.label, beforeText: before.content, afterText: renumbered.content,
+            quote: { article: `${before.number} → ${renumbered.number}`, from: baseDoc.label, to: nextDoc.label, beforeExcerpt: excerpt(before.content), afterExcerpt: excerpt(renumbered.content) }
+          }));
+          stats.renumbered++;
+        } else {
+          changes.push(createChange({
+            id: uid(), article: before.number, type: 'Artículo eliminado', subtypes: [], category: inferCategory(before.content),
+            description: `El artículo ${before.number} está presente en ${baseDoc.label} y no aparece en ${nextDoc.label}.`,
+            beforeVersion: baseDoc.label, afterVersion: nextDoc.label, beforeText: before.content, afterText: FALLBACK_UNAVAILABLE,
+            quote: { article: before.number, from: baseDoc.label, to: nextDoc.label, beforeExcerpt: excerpt(before.content), afterExcerpt: FALLBACK_UNAVAILABLE }
+          }));
+          stats.removed++;
+        }
+      });
+
+      afterArticles.forEach((after) => {
+        if (usedAfterKeys.has(after.number)) return;
+        if (!beforeMap.has(after.number)) {
+          changes.push(createChange({
+            id: uid(), article: after.number, type: 'Artículo agregado', subtypes: [], category: inferCategory(after.content),
+            description: `El artículo ${after.number} aparece incorporado en ${nextDoc.label}.`,
+            beforeVersion: baseDoc.label, afterVersion: nextDoc.label, beforeText: FALLBACK_UNAVAILABLE, afterText: after.content,
+            quote: { article: after.number, from: baseDoc.label, to: nextDoc.label, beforeExcerpt: FALLBACK_UNAVAILABLE, afterExcerpt: excerpt(after.content) }
+          }));
+          stats.added++;
+        }
+      });
+
+      const primaryChanges = changes.filter((c) => ['Artículo agregado','Artículo eliminado','Artículo modificado (contenido)','Artículo renumerado'].includes(c.type));
+      const counts = countBy(primaryChanges, 'type');
+      const parts = [];
+      if (counts['Artículo agregado']) parts.push(`${counts['Artículo agregado']} agregado(s)`);
+      if (counts['Artículo eliminado']) parts.push(`${counts['Artículo eliminado']} eliminado(s)`);
+      if (counts['Artículo modificado (contenido)']) parts.push(`${counts['Artículo modificado (contenido)']} modificado(s)`);
+      if (counts['Artículo renumerado']) parts.push(`${counts['Artículo renumerado']} renumerado(s)`);
+      return {
+        from: baseDoc,
+        to: nextDoc,
+        changes,
+        stats,
+        description: parts.length ? `Entre ${baseDoc.label} y ${nextDoc.label} se detectaron ${parts.join(', ')}.` : `No se detectaron diferencias explícitas entre ${baseDoc.label} y ${nextDoc.label}.`,
+        affectedArticles: [...new Set(changes.map((c) => c.article))]
+      };
+    }
+
+    function createDoc(payload) {
+      const order = state.docs.length ? Math.max(...state.docs.map((d) => d.order)) + 1 : 1;
+      return {
+        id: uid(), label: payload.label || payload.filename || `Versión ${order}`, role: payload.role || (state.docs.length ? 'version' : 'original'),
+        dateInfo: payload.dateInfo || '[N/D]', desc: payload.desc || '[N/D]', text: normalizeText(payload.text), filename: payload.filename || '[N/D]',
+        order, status: payload.status || 'cargado', note: payload.note || '', createdAt: new Date().toISOString()
+      };
+    }
+
+    function addDoc(doc) { state.docs.push(doc); saveState(); renderAll(); }
+    function removeDoc(id) { state.docs = state.docs.filter((d) => d.id !== id); state.docs.forEach((d, i) => d.order = i + 1); saveState(); renderAll(); toast('Documento eliminado del workspace.'); }
+    function moveDoc(id, delta) {
+      const docs = [...state.docs].sort((a,b) => a.order - b.order);
+      const idx = docs.findIndex((d) => d.id === id);
+      const next = idx + delta;
+      if (idx < 0 || next < 0 || next >= docs.length) return;
+      [docs[idx], docs[next]] = [docs[next], docs[idx]];
+      docs.forEach((d, i) => d.order = i + 1);
+      state.docs = docs; saveState(); renderAll();
+    }
+    function updateDocField(id, field, value) {
+      const doc = state.docs.find((d) => d.id === id);
+      if (!doc) return;
+      doc[field] = value; doc.status = doc.status === 'no legible' ? 'no legible' : 'actualizado'; saveState(); renderAll();
+    }
+    function replaceDocText(id, text, filename, status, note) {
+      const doc = state.docs.find((d) => d.id === id);
+      if (!doc) return;
+      doc.text = normalizeText(text); doc.filename = filename || '[N/D]'; doc.status = status || 'actualizado'; doc.note = note || ''; saveState(); renderAll(); toast(`Se reemplazó el contenido de ${doc.label}.`);
+    }
+    function clearWorkspace() {
+      state.docs = []; state.analysis = { changes: [], timeline: [], summary: null }; state.selectedChangeId = null; localStorage.removeItem(STORAGE_KEY); renderAll(); toast('Workspace limpiado.');
+    }
+    function countArticles(text) { return parseArticles(text).length; }
+
+    async function handleFiles(files) {
+      const incomingFiles = Array.from(files || []);
+      if (!incomingFiles.length) { toast('No se seleccionaron archivos.'); return; }
+      toast(`Procesando ${incomingFiles.length} archivo(s)...`);
+      for (const file of incomingFiles) {
+        try {
+          const payload = await extractFilePayload(file);
+          addDoc(createDoc({
+            label: file.name.replace(/\.[^.]+$/, ''),
+            role: state.docs.length === 0 ? 'original' : 'version',
+            dateInfo: '[N/D]',
+            desc: `Archivo importado (${(file.name.split('.').pop() || '').toUpperCase()})`,
+            text: payload.text,
+            filename: file.name,
+            status: payload.status === 'ok' ? 'cargado' : payload.status === 'partial' ? 'lectura parcial' : 'no legible',
+            note: payload.note
+          }));
+        } catch (err) {
+          console.error('Error crítico al leer archivo', file.name, err);
+          addDoc(createDoc({
+            label: file.name.replace(/\.[^.]+$/, ''),
+            role: state.docs.length === 0 ? 'original' : 'version',
+            dateInfo: '[N/D]',
+            desc: `Archivo importado (${(file.name.split('.').pop() || '').toUpperCase()})`,
+            text: unavailableMessage(file.name, 'Ocurrió un error inesperado durante la lectura.'),
+            filename: file.name,
+            status: 'no legible',
+            note: 'Error inesperado al leer archivo'
+          }));
+        }
+      }
+      toast('Carga finalizada.');
+    }
+
+    function getTypeBadgeClass(type) {
+      if (type === 'Artículo agregado') return 'mod-add';
+      if (type === 'Artículo eliminado') return 'mod-del';
+      if (type === 'Artículo modificado (contenido)') return 'mod-main';
+      if (type === 'Artículo renumerado') return 'mod-ren';
+      return 'mod-other';
+    }
+
+    function renderDocList() {
+      const list = $('#docList');
+      const docs = [...state.docs].sort((a,b) => a.order - b.order);
+      if (!docs.length) {
+        list.innerHTML = '<div class="empty">Todavía no hay documentos cargados. Podés subir archivos o pegar texto manualmente.</div>';
+        return;
+      }
+      list.innerHTML = docs.map((doc, index) => {
+        const statusClass = doc.status === 'lectura parcial' || doc.status === 'no legible' ? 'warn' : (doc.status === 'actualizado' ? 'updated' : 'version');
+        return `
+          <div class="doc-item">
+            <div class="doc-top">
+              <div>
+                <strong contenteditable="true" data-edit-label="${escapeAttr(doc.id)}">${escapeHtml(doc.label)}</strong>
+                <div class="doc-meta">
+                  <span class="pill ${doc.role === 'original' ? 'original' : 'version'}">${doc.role === 'original' ? 'Proyecto original' : 'Versión posterior'}</span>
+                  <span class="pill ${statusClass}">${escapeHtml(doc.status)}</span>
+                  <span class="pill version">Orden ${doc.order}</span>
+                </div>
+              </div>
+              <div class="doc-actions">
+                <button class="btn ghost small" data-move-up="${escapeAttr(doc.id)}" ${index === 0 ? 'disabled' : ''}>↑</button>
+                <button class="btn ghost small" data-move-down="${escapeAttr(doc.id)}" ${index === docs.length - 1 ? 'disabled' : ''}>↓</button>
+                <button class="btn danger small" data-remove-doc="${escapeAttr(doc.id)}">Eliminar</button>
+              </div>
+            </div>
+            <div class="upload-tools">
+              <div class="field"><label>Fecha / ID</label><input type="text" value="${escapeAttr(doc.dateInfo)}" data-update-field="dateInfo" data-doc-id="${escapeAttr(doc.id)}" /></div>
+              <div class="field"><label>Descripción</label><input type="text" value="${escapeAttr(doc.desc)}" data-update-field="desc" data-doc-id="${escapeAttr(doc.id)}" /></div>
+            </div>
+            <div class="inline">
+              <label class="btn secondary small" style="cursor:pointer;">Reemplazar archivo<input class="hidden" type="file" data-replace-file="${escapeAttr(doc.id)}" accept=".txt,.md,.html,.json,.pdf,.doc,.docx,text/plain,text/markdown,application/json,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" /></label>
+              <button class="btn ghost small" data-toggle-role="${escapeAttr(doc.id)}">${doc.role === 'original' ? 'Marcar como versión' : 'Marcar como original'}</button>
+            </div>
+            <div class="hint">${escapeHtml(doc.filename || '[N/D]')} · ${countArticles(doc.text)} artículo(s) reconocidos${doc.note ? ` · ${escapeHtml(doc.note)}` : ''}</div>
+          </div>`;
+      }).join('');
+
+      $$('[data-remove-doc]').forEach((btn) => btn.addEventListener('click', () => removeDoc(btn.dataset.removeDoc)));
+      $$('[data-move-up]').forEach((btn) => btn.addEventListener('click', () => moveDoc(btn.dataset.moveUp, -1)));
+      $$('[data-move-down]').forEach((btn) => btn.addEventListener('click', () => moveDoc(btn.dataset.moveDown, 1)));
+      $$('[data-update-field]').forEach((input) => input.addEventListener('change', () => updateDocField(input.dataset.docId, input.dataset.updateField, input.value)));
+      $$('[data-toggle-role]').forEach((btn) => btn.addEventListener('click', () => {
+        const doc = state.docs.find((d) => d.id === btn.dataset.toggleRole);
+        if (!doc) return;
+        if (doc.role === 'original') doc.role = 'version';
+        else {
+          state.docs.forEach((d) => { if (d.id !== doc.id && d.role === 'original') d.role = 'version'; });
+          doc.role = 'original';
+        }
+        doc.status = doc.status === 'no legible' ? 'no legible' : 'actualizado';
+        saveState(); renderAll();
+      }));
+      $$('[data-replace-file]').forEach((input) => input.addEventListener('change', async () => {
+        const file = input.files?.[0];
+        if (!file) return;
+        const payload = await extractFilePayload(file).catch(() => ({ text: unavailableMessage(file.name, 'No se pudo extraer el contenido del archivo de reemplazo.'), status: 'unavailable', note: 'Error al reemplazar' }));
+        replaceDocText(input.dataset.replaceFile, payload.text, file.name, payload.status === 'ok' ? 'actualizado' : payload.status === 'partial' ? 'lectura parcial' : 'no legible', payload.note);
+        input.value = '';
+      }));
+      $$('[data-edit-label]').forEach((node) => node.addEventListener('blur', () => updateDocField(node.dataset.editLabel, 'label', (node.textContent || '').trim() || 'Sin título')));
+    }
+
+    function renderTimeline() {
+      const wrap = $('#timeline');
+      const filter = $('#timelineFilter');
+      const timeline = state.analysis.timeline || [];
+      const options = ['Todos', ...timeline.map((t) => `${t.from.label} → ${t.to.label}`)];
+      const current = filter.value || 'Todos';
+      filter.innerHTML = options.map((opt) => `<option value="${escapeAttr(opt)}">${escapeHtml(opt)}</option>`).join('');
+      filter.value = options.includes(current) ? current : 'Todos';
+      const filtered = filter.value === 'Todos' ? timeline : timeline.filter((t) => `${t.from.label} → ${t.to.label}` === filter.value);
+      if (!filtered.length) { wrap.innerHTML = '<div class="empty">Todavía no hay evolución disponible. Cargá versiones y ejecutá el análisis.</div>'; return; }
+      wrap.innerHTML = filtered.map((item) => `
+        <article class="timeline-item">
+          <div class="timeline-head">
+            <div><strong>${escapeHtml(item.from.label)} → ${escapeHtml(item.to.label)}</strong><div class="hint" style="margin-top:6px;">${escapeHtml(item.description)}</div></div>
+            <div class="timeline-stats">
+              <span class="stat-dot stat-add">+ ${item.stats.added}</span>
+              <span class="stat-dot stat-del">− ${item.stats.removed}</span>
+              <span class="stat-dot stat-mod">~ ${item.stats.modified}</span>
+              <span class="stat-dot stat-ren"># ${item.stats.renumbered}</span>
+            </div>
+          </div>
+          <div class="hint">Artículos afectados: ${item.affectedArticles.length ? item.affectedArticles.map(escapeHtml).join(', ') : '[N/D]'}</div>
+        </article>`).join('');
+    }
+
+    function currentFilteredChanges() {
+      const search = ($('#searchInput').value || '').toLowerCase().trim();
+      const type = $('#typeFilter').value;
+      const category = $('#categoryFilter').value;
+      const sensitive = $('#sensitiveFilter').value;
+      let changes = [...(state.analysis.changes || [])];
+      if (search) {
+        changes = changes.filter((c) => String(c.article).toLowerCase().includes(search) || c.type.toLowerCase().includes(search) || c.category.toLowerCase().includes(search) || c.description.toLowerCase().includes(search) || (c.beforeText || '').toLowerCase().includes(search) || (c.afterText || '').toLowerCase().includes(search));
+      }
+      if (type !== 'Todos') changes = changes.filter((c) => c.type === type);
+      if (category !== 'Todos') changes = changes.filter((c) => c.category === category);
+      if (sensitive === 'yes') changes = changes.filter((c) => c.sensitive);
+      if (sensitive === 'no') changes = changes.filter((c) => !c.sensitive);
+      changes.sort((a, b) => {
+        const key = state.sort.key;
+        let av = key === 'article' ? numericArticleValue(a.article) : a[key];
+        let bv = key === 'article' ? numericArticleValue(b.article) : b[key];
+        av = typeof av === 'string' ? av.toLowerCase() : av;
+        bv = typeof bv === 'string' ? bv.toLowerCase() : bv;
+        if (av < bv) return state.sort.dir === 'asc' ? -1 : 1;
+        if (av > bv) return state.sort.dir === 'asc' ? 1 : -1;
+        return 0;
+      });
+      return changes;
+    }
+
+    function renderMatrix() {
+      const body = $('#matrixBody');
+      const typeFilter = $('#typeFilter');
+      const categoryFilter = $('#categoryFilter');
+      const typeCurrent = typeFilter.value || 'Todos';
+      const catCurrent = categoryFilter.value || 'Todos';
+      typeFilter.innerHTML = ['Todos', ...MOD_TYPES].map((v) => `<option value="${escapeAttr(v)}">${escapeHtml(v)}</option>`).join('');
+      categoryFilter.innerHTML = ['Todos', ...CATEGORIES].map((v) => `<option value="${escapeAttr(v)}">${escapeHtml(v)}</option>`).join('');
+      typeFilter.value = typeCurrent; categoryFilter.value = catCurrent;
+      const changes = currentFilteredChanges();
+      if (!changes.length) { body.innerHTML = '<tr><td colspan="9"><div class="empty">No hay registros para los filtros actuales.</div></td></tr>'; return; }
+      body.innerHTML = changes.map((change) => `
+        <tr class="${change.sensitive ? 'is-sensitive' : ''}" data-change-row="${change.id}">
+          <td>${escapeHtml(String(change.article))}</td>
+          <td><span class="mod-tag ${getTypeBadgeClass(change.type)}">${escapeHtml(change.type)}</span></td>
+          <td>${escapeHtml(change.category)}</td>
+          <td>${escapeHtml(change.description)}</td>
+          <td>${escapeHtml(change.legalImpact)}</td>
+          <td>${escapeHtml(change.practicalImpact)}</td>
+          <td>${escapeHtml(change.politicalImpact)}</td>
+          <td><div class="hint"><strong>Origen:</strong> ${escapeHtml(change.beforeVersion)}<br><strong>Destino:</strong> ${escapeHtml(change.afterVersion)}</div></td>
+          <td><button class="expand-btn" data-expand="${escapeAttr(change.id)}">Ver</button></td>
+        </tr>
+        <tr class="details-row ${state.selectedChangeId === change.id ? 'open' : ''}" id="details-${escapeAttr(change.id)}">
+          <td colspan="9">
+            <div class="details-box">
+              <div><strong>Cita obligatoria</strong><div class="hint" style="margin-top:8px;">Artículo ${escapeHtml(String(change.quote.article))} · ${escapeHtml(change.quote.from)} → ${escapeHtml(change.quote.to)}</div></div>
+              <div class="detail-grid">
+                <div class="quote-card"><h4>Versión origen</h4><p>${escapeHtml(change.quote.beforeExcerpt)}</p></div>
+                <div class="quote-card"><h4>Versión modificada</h4><p>${escapeHtml(change.quote.afterExcerpt)}</p></div>
+              </div>
+              <div class="inline">
+                <span class="status-chip">Impacto jurídico: ${escapeHtml(change.legalImpact)}</span>
+                <span class="status-chip">Impacto práctico: ${escapeHtml(change.practicalImpact)}</span>
+                <span class="status-chip">Impacto político: ${escapeHtml(change.politicalImpact)}</span>
+              </div>
+            </div>
+          </td>
+        </tr>`).join('');
+      $$('[data-expand]').forEach((btn) => btn.addEventListener('click', (e) => { e.stopPropagation(); selectChange(btn.dataset.expand); }));
+      $$('th[data-sort]').forEach((th) => th.onclick = () => { const key = th.dataset.sort; if (state.sort.key === key) state.sort.dir = state.sort.dir === 'asc' ? 'desc' : 'asc'; else { state.sort.key = key; state.sort.dir = 'asc'; } renderMatrix(); });
+      $$('[data-change-row]').forEach((row) => row.addEventListener('click', () => selectChange(row.dataset.changeRow)));
+    }
+
+    function selectChange(id) { state.selectedChangeId = id; renderMatrix(); renderSelectedTrace(); }
+    function renderSelectedTrace() {
+      const wrap = $('#selectedTrace');
+      const change = state.analysis.changes.find((c) => c.id === state.selectedChangeId);
+      if (!change) { wrap.innerHTML = '<div class="trace-mini"><strong>Sin selección</strong><p style="margin-top:8px;">Elegí una fila para inspeccionar la trazabilidad.</p></div>'; return; }
+      wrap.innerHTML = `
+        <div class="trace-mini"><strong>${escapeHtml(change.type)}</strong><p style="margin-top:8px;"><strong>Artículo:</strong> ${escapeHtml(String(change.article))}<br><strong>Tramo:</strong> ${escapeHtml(change.beforeVersion)} → ${escapeHtml(change.afterVersion)}</p></div>
+        <div class="trace-mini"><strong>Fragmento origen</strong><p style="margin-top:8px;">${escapeHtml(change.quote.beforeExcerpt)}</p></div>
+        <div class="trace-mini"><strong>Fragmento modificado</strong><p style="margin-top:8px;">${escapeHtml(change.quote.afterExcerpt)}</p></div>`;
+    }
+
+    function renderBars(entries) {
+      const max = Math.max(...entries.map(([, v]) => v), 1);
+      return entries.map(([label, value]) => `
+        <div class="bar-item">
+          <div class="bar-row"><span>${escapeHtml(label)}</span><strong>${value}</strong></div>
+          <div class="bar-track"><div class="bar-fill" style="width:${(value / max) * 100}%"></div></div>
+        </div>`).join('');
+    }
+
+    function renderSummary() {
+      const kpiGrid = $('#kpiGrid');
+      const acc = $('#summaryAccordion');
+      const summary = state.analysis.summary;
+      if (!summary) {
+        kpiGrid.innerHTML = '<div class="empty" style="grid-column:1/-1;">El panel de síntesis se habilita después de ejecutar el análisis.</div>';
+        acc.innerHTML = '';
+        renderSelectedTrace();
+        return;
+      }
+      const typeCount = summary.byType;
+      const categoryCount = summary.byCategory;
+      kpiGrid.innerHTML = `
+        <div class="kpi"><div class="label">Cambios detectados</div><div class="value">${summary.totalChanges}</div><div class="sub">Comparación consolidada</div></div>
+        <div class="kpi"><div class="label">Artículos impactados</div><div class="value">${summary.impactedArticles}</div><div class="sub">Con al menos una variación</div></div>
+        <div class="kpi"><div class="label">Artículo agregado</div><div class="value">${typeCount['Artículo agregado'] || 0}</div><div class="sub">Altas explícitas</div></div>
+        <div class="kpi"><div class="label">Artículo modificado (contenido)</div><div class="value">${typeCount['Artículo modificado (contenido)'] || 0}</div><div class="sub">Cambios centrales</div></div>`;
+      const topCats = Object.entries(categoryCount).sort((a,b) => b[1] - a[1]).slice(0, 5);
+      acc.innerHTML = `
+        <div class="acc-item open"><button class="acc-btn"><span>Totales por tipo de modificación</span><span>${Object.keys(typeCount).length}</span></button><div class="acc-content">${renderBars(Object.entries(typeCount).sort((a,b) => b[1] - a[1]))}</div></div>
+        <div class="acc-item"><button class="acc-btn"><span>Totales por categoría temática</span><span>${topCats.length}</span></button><div class="acc-content">${renderBars(topCats)}</div></div>
+        <div class="acc-item"><button class="acc-btn"><span>Top 3 cambios con mayor impacto jurídico</span><span>${summary.topLegal.length}</span></button><div class="acc-content">${summary.topLegal.map((c) => `<p><strong>Art. ${escapeHtml(String(c.article))}</strong> · ${escapeHtml(c.type)} · ${escapeHtml(c.legalImpact)}<br>${escapeHtml(c.description)}</p>`).join('')}</div></div>
+        <div class="acc-item"><button class="acc-btn"><span>Top 3 cambios con mayor sensibilidad política</span><span>${summary.topPolitical.length}</span></button><div class="acc-content">${summary.topPolitical.map((c) => `<p><strong>Art. ${escapeHtml(String(c.article))}</strong> · ${escapeHtml(c.type)} · ${escapeHtml(c.politicalImpact)}<br>${escapeHtml(c.description)}</p>`).join('')}</div></div>
+        <div class="acc-item"><button class="acc-btn"><span>Artículos modificados más de una vez</span><span>${summary.repeatedArticles.length}</span></button><div class="acc-content">${summary.repeatedArticles.length ? summary.repeatedArticles.map((r) => `<p><strong>Art. ${escapeHtml(String(r.article))}</strong> · ${r.count} registros detectados</p>`).join('') : '<p>[N/D]</p>'}</div></div>`;
+      $$('#summaryAccordion .acc-btn').forEach((btn) => btn.addEventListener('click', () => btn.parentElement.classList.toggle('open')));
+      renderSelectedTrace();
+    }
+
+    function renderTraceability() {
+      const wrap = $('#traceabilityList');
+      const changes = state.analysis.changes || [];
+      if (!changes.length) { wrap.innerHTML = '<div class="empty">No hay citas registradas todavía.</div>'; return; }
+      wrap.innerHTML = `<div class="accordion">${changes.slice(0, 80).map((c) => `
+        <div class="acc-item">
+          <button class="acc-btn"><span><strong>Art. ${escapeHtml(String(c.article))}</strong> · ${escapeHtml(c.type)} · ${escapeHtml(c.beforeVersion)} → ${escapeHtml(c.afterVersion)}</span><span>${escapeHtml(c.category)}</span></button>
+          <div class="acc-content">
+            <p><strong>Descripción:</strong> ${escapeHtml(c.description)}</p>
+            <p><strong>Cita obligatoria:</strong> artículo ${escapeHtml(String(c.quote.article))}; versión origen ${escapeHtml(c.quote.from)}; versión modificada ${escapeHtml(c.quote.to)}.</p>
+            <p><strong>Fragmento origen:</strong> ${escapeHtml(c.quote.beforeExcerpt)}</p>
+            <p><strong>Fragmento modificado:</strong> ${escapeHtml(c.quote.afterExcerpt)}</p>
+          </div>
+        </div>`).join('')}</div>`;
+      $$('#traceabilityList .acc-btn').forEach((btn) => btn.addEventListener('click', () => btn.parentElement.classList.toggle('open')));
+    }
+
+    function renderMethod() {
+      const wrap = $('#methodBars');
+      const values = [
+        ['Documentos cargados', state.docs.length],
+        ['Tramos comparados', Math.max(state.docs.length - 1, 0)],
+        ['Cambios detectados', state.analysis.changes.length],
+        ['Campos con inferencia no disponible', state.analysis.changes.filter((c) => String(c.quote.beforeExcerpt).includes('[DATO') || String(c.quote.afterExcerpt).includes('[DATO')).length]
+      ];
+      wrap.innerHTML = renderBars(values);
+    }
+
+    function renderStats() {
+      $('#statusDocs').textContent = `${state.docs.length} documento(s)`;
+      $('#statusAnalysis').textContent = state.analysis.changes.length ? 'Análisis actualizado' : 'Análisis pendiente';
+      $('#heroDocs').textContent = state.docs.length;
+      $('#heroChanges').textContent = state.analysis.changes.length;
+      $('#heroArticles').textContent = state.analysis.summary?.impactedArticles || 0;
+    }
+
+    function renderAll() { renderDocList(); renderTimeline(); renderMatrix(); renderSummary(); renderTraceability(); renderMethod(); renderStats(); }
+
+    function runAnalysis() {
+      if (state.docs.length < 2) {
+        toast('Necesitás al menos dos documentos para comparar versiones.');
+        state.analysis = { changes: [], timeline: [], summary: null };
+        renderAll();
+        return;
+      }
+      const ordered = [...state.docs].sort((a,b) => a.order - b.order);
+      const timeline = [];
+      let allChanges = [];
+      for (let i = 0; i < ordered.length - 1; i++) {
+        const comparison = compareVersions(ordered[i], ordered[i + 1]);
+        timeline.push(comparison);
+        allChanges = allChanges.concat(comparison.changes);
+      }
+      const articleCounts = countBy(allChanges, 'article');
+      const repeatedArticles = Object.entries(articleCounts).filter(([, c]) => c > 1).map(([article, count]) => ({ article, count })).sort((a,b) => b.count - a.count).slice(0, 8);
+      state.analysis = {
+        changes: allChanges,
+        timeline,
+        summary: {
+          totalChanges: allChanges.length,
+          impactedArticles: new Set(allChanges.map((c) => c.article)).size,
+          byType: countBy(allChanges, 'type'),
+          byCategory: countBy(allChanges, 'category'),
+          topLegal: [...allChanges].sort((a,b) => b.scores.legal - a.scores.legal).slice(0, 3),
+          topPolitical: [...allChanges].sort((a,b) => b.scores.political - a.scores.political).slice(0, 3),
+          repeatedArticles
+        }
+      };
+      if (!state.analysis.changes.find((c) => c.id === state.selectedChangeId)) state.selectedChangeId = state.analysis.changes[0]?.id || null;
+      renderAll();
+      toast('Análisis actualizado correctamente.');
+    }
+
+    function loadDemo() {
+      state.docs = [];
+      const demoOriginal = `Artículo 1.- La presente ley regula la relación laboral en plataformas digitales de reparto.\n\nArtículo 2.- Se considera trabajador de plataforma a toda persona humana que presta servicios personales mediante una aplicación.\n\nArtículo 3.- La autoridad de aplicación será el Ministerio de Trabajo.\n\nArtículo 4.- La ley entrará en vigencia a los 90 días de su publicación.`;
+      const demoV2 = `Artículo 1.- La presente ley regula la relación laboral en plataformas digitales de reparto y transporte urbano.\n\nArtículo 2.- Se considera trabajador de plataforma a toda persona humana que presta servicios personales o habituales mediante una aplicación o interfaz digital.\n\nArtículo 3.- La autoridad de aplicación será el Ministerio de Capital Humano.\n\nArtículo 4.- La ley entrará en vigencia a los 60 días de su publicación.\n\nArtículo 5.- Las empresas deberán registrar a los trabajadores alcanzados por la presente ley.`;
+      const demoV3 = `Artículo 1.- La presente ley regula la relación laboral en plataformas digitales de reparto, transporte urbano y mensajería.\n\nArtículo 2.- Se considera trabajador de plataforma a toda persona humana que presta servicios personales, habituales o continuos mediante una aplicación o interfaz digital.\n\nArtículo 4.- La ley entrará en vigencia a los 30 días de su reglamentación.\n\nArtículo 5.- Las empresas deberán registrar a los trabajadores alcanzados por la presente ley y realizar los aportes de seguridad social correspondientes.\n\nArtículo 6.- La autoridad de aplicación podrá dictar normas complementarias.`;
+      addDoc(createDoc({ label: 'Proyecto original', role: 'original', dateInfo: 'Versión base', desc: 'Texto inicial', text: demoOriginal, filename: 'demo-original.txt', status: 'cargado', note: 'Demo' }));
+      addDoc(createDoc({ label: 'Versión comisión', role: 'version', dateInfo: 'V2', desc: 'Cambios de alcance y vigencia', text: demoV2, filename: 'demo-v2.txt', status: 'cargado', note: 'Demo' }));
+      addDoc(createDoc({ label: 'Versión dictamen final', role: 'version', dateInfo: 'V3', desc: 'Nueva reformulación', text: demoV3, filename: 'demo-v3.txt', status: 'cargado', note: 'Demo' }));
+      toast('Demo cargada.');
+      runAnalysis();
+    }
+
+    function runSelfTests() {
+      console.assert(parseArticles('Artículo 1.- Uno\n\nArtículo 2.- Dos').length === 2, 'Test parseArticles');
+      console.assert(inferCategory('plataforma digital y algoritmo') === 'Regulación de plataformas', 'Test inferCategory');
+      console.assert(detectSubtypes('La autoridad de aplicación será A', 'La autoridad de aplicación será B').includes('Cambio en autoridad de aplicación'), 'Test detectSubtypes');
+      console.assert(similarity('uno dos tres cuatro', 'uno dos tres') > 0.4, 'Test similarity');
+      console.assert(excerpt('', 10) === FALLBACK_UNAVAILABLE, 'Test excerpt fallback');
+      console.assert(normalizeText('A   B\n\n\nC') === 'A B\n\nC', 'Test normalizeText');
+      console.assert(typeof unavailableMessage('x.pdf').includes('[DATO') === 'boolean', 'Test unavailableMessage');
+      console.info('Self-tests OK');
+    }
+
+    function bindEvents() {
+      const fileInput = $('#fileInput');
+      const selectFilesBtn = $('#selectFilesBtn');
+      const dropzone = $('#dropzone');
+      const openPicker = () => { fileInput.value = ''; fileInput.click(); };
+
+      fileInput.addEventListener('change', async (e) => {
+        const files = e.target.files;
+        if (!files?.length) return;
+        await handleFiles(files);
+        fileInput.value = '';
+      });
+      selectFilesBtn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); openPicker(); });
+      dropzone.addEventListener('click', (e) => { if (e.target.closest('#selectFilesBtn')) return; openPicker(); });
+      dropzone.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPicker(); } });
+      ['dragenter', 'dragover'].forEach((evt) => dropzone.addEventListener(evt, (e) => { e.preventDefault(); e.stopPropagation(); dropzone.classList.add('dragover'); }));
+      ['dragleave', 'dragend'].forEach((evt) => dropzone.addEventListener(evt, (e) => { e.preventDefault(); e.stopPropagation(); dropzone.classList.remove('dragover'); }));
+      dropzone.addEventListener('drop', async (e) => { e.preventDefault(); e.stopPropagation(); dropzone.classList.remove('dragover'); const files = e.dataTransfer?.files; if (!files?.length) { toast('No se detectaron archivos en el drop.'); return; } await handleFiles(files); });
+      $('#addManualBtn').addEventListener('click', () => {
+        const text = ($('#manualText').value || '').trim();
+        if (!text) { toast('Pegá un texto antes de agregarlo al workspace.'); return; }
+        const doc = createDoc({ label: ($('#manualLabel').value || '').trim() || undefined, role: $('#manualRole').value, dateInfo: ($('#manualDate').value || '').trim() || '[N/D]', desc: ($('#manualDesc').value || '').trim() || 'Texto incorporado manualmente', text, filename: '[Pegado manual]', status: 'cargado', note: 'Carga manual' });
+        if (doc.role === 'original') state.docs.forEach((d) => { if (d.role === 'original') d.role = 'version'; });
+        addDoc(doc);
+        ['manualLabel','manualDate','manualDesc','manualText'].forEach((id) => $('#' + id).value = '');
+        $('#manualRole').value = 'version';
+        toast('Texto agregado al workspace.');
+      });
+      $('#runAnalysisBtn').addEventListener('click', runAnalysis);
+      $('#clearWorkspaceBtn').addEventListener('click', clearWorkspace);
+      $('#loadDemoBtn').addEventListener('click', loadDemo);
+      $('#timelineFilter').addEventListener('change', renderTimeline);
+      ['searchInput','typeFilter','categoryFilter','sensitiveFilter'].forEach((id) => {
+        $('#' + id).addEventListener('input', renderMatrix);
+        $('#' + id).addEventListener('change', renderMatrix);
+      });
+      $$('.nav a').forEach((link) => link.addEventListener('click', () => { $$('.nav a').forEach((a) => a.classList.remove('active')); link.classList.add('active'); }));
+    }
+
+    function init() {
+      loadState();
+      bindEvents();
+      runSelfTests();
+      renderAll();
+    }
+    init();
+  </script>
+</body>
+</html>
