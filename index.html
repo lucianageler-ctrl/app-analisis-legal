@@ -458,6 +458,10 @@
   <script>
     const STORAGE_KEY = 'normative-evolution-workspace-v3';
     const FALLBACK_UNAVAILABLE = '[DATO NO DISPONIBLE EN EL TEXTO]';
+if (window.pdfjsLib && window.pdfjsLib.GlobalWorkerOptions) {
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.3.136/pdf.worker.min.js";
+}
     const MOD_TYPES = [
       'Artículo agregado','Artículo eliminado','Artículo modificado (contenido)','Artículo renumerado','Cambio en inciso/párrafo','Cambio en sujetos alcanzados/excluidos','Cambio en obligaciones o derechos','Cambio en porcentajes, montos o condiciones','Cambio en autoridad de aplicación','Cambio en vigencia o implementación','Cambio en definición clave'
     ];
@@ -867,7 +871,9 @@
         try {
           let payload;
 
-if (file.type === "application/pdf") {
+const extension = (file.name.split('.').pop() || '').toLowerCase();
+
+if (file.type === "application/pdf" || extension === "pdf") {
   toast(`Procesando PDF: ${file.name}...`);
 
   // intentar lectura normal
