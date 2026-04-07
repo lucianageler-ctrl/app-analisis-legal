@@ -455,6 +455,9 @@
 
   <div class="toast-wrap" id="toastWrap"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.3.136/pdf.min.js"></script>
+<script src="https://unpkg.com/tesseract.js@5/dist/tesseract.min.js"></script>
+
   <script>
     const STORAGE_KEY = 'normative-evolution-workspace-v3';
     const FALLBACK_UNAVAILABLE = '[DATO NO DISPONIBLE EN EL TEXTO]';
@@ -1319,9 +1322,6 @@ if (file.type === "application/pdf" || extension === "pdf") {
     }
     init();
   </script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.3.136/pdf.min.js"></script>
-<script src="https://unpkg.com/tesseract.js@5/dist/tesseract.min.js"></script>
 
 </body>
 </html>
