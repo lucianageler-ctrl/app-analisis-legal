@@ -455,7 +455,8 @@
 
   <div class="toast-wrap" id="toastWrap"></div>
 
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.3.136/pdf.min.js"></script>
+<script src="https://unpkg.com/tesseract.js@5/dist/tesseract.min.js"></script>
 
   <script>
     const STORAGE_KEY = 'normative-evolution-workspace-v3';
@@ -596,9 +597,9 @@ if (window.pdfjsLib && window.pdfjsLib.GlobalWorkerOptions) {
 
     async function extractTextFromPdf(file) {
       try {
-        const window.pdfjsLib = await ensurePdfJs();
+        const pdfjsLib = await ensurePdfJs();
         const arrayBuffer = await readAsArrayBuffer(file);
-        const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
         let text = '';
         for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
           const page = await pdf.getPage(pageNum);
@@ -920,7 +921,7 @@ if (file.type === "application/pdf" || extension === "pdf") {
           viewport: viewport
         }).promise;
 
-        const result = await Tesseract.recognize(canvas, "spa");
+        const result = await window.Tesseract.recognize(canvas, "spa");
         ocrText += result.data.text + "\n";
       }
 
@@ -932,7 +933,11 @@ if (file.type === "application/pdf" || extension === "pdf") {
     }
   }
 
-  payload = { text };
+  payload = {
+  text,
+  status: text && text.trim().length ? 'ok' : 'unavailable',
+  note: text && text.trim().length ? 'PDF procesado' : 'PDF no legible'
+};
 
 } else {
   payload = await extractFilePayload(file);
