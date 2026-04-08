@@ -5,398 +5,526 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Extractor y Comparador de Documentos</title>
   <style>
-    :root {
-      --bg: #07111f;
-      --bg2: #0d1b2f;
-      --panel: rgba(16, 34, 58, 0.94);
-      --line: rgba(160, 197, 255, 0.14);
-      --text: #edf4ff;
-      --muted: #a9bfdc;
-      --cyan: #55d6ff;
-      --blue: #4f8cff;
-      --green: #2ad08f;
-      --red: #ff6482;
-      --amber: #ffbf5e;
-      --shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
-      --radius: 18px;
-      --font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
+  :root {
+    --bg: #f7f9fc;
+    --surface: #ffffff;
+    --surface-2: #f3f6fb;
+    --border: #d9e2ef;
+    --border-strong: #c6d4e8;
+    --text: #10233f;
+    --text-soft: #5c6f89;
+    --title: #0d1b2a;
 
-    * { box-sizing: border-box; }
+    --primary: #183b6b;
+    --primary-2: #2e5b9a;
+    --sky: #dcecff;
 
-    body {
-      margin: 0;
-      font-family: var(--font);
-      background:
-        radial-gradient(circle at top right, rgba(85,214,255,.14), transparent 28%),
-        radial-gradient(circle at top left, rgba(79,140,255,.12), transparent 30%),
-        linear-gradient(180deg, #07111f 0%, #091628 100%);
-      color: var(--text);
-      min-height: 100vh;
-    }
+    --success: #1f8f5f;
+    --success-bg: #e8f8f0;
 
-    .wrap {
-      max-width: 1320px;
-      margin: 0 auto;
-      padding: 28px;
-      display: grid;
-      gap: 22px;
-    }
+    --warn: #b7791f;
+    --warn-bg: #fff6e5;
 
-    .hero, .panel {
-      background: linear-gradient(180deg, rgba(18,40,67,.95), rgba(13,27,47,.93));
-      border: 1px solid var(--line);
-      border-radius: 22px;
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
+    --danger: #c05656;
+    --danger-bg: #fdeeee;
 
-    .hero {
-      padding: 28px;
-      display: grid;
-      grid-template-columns: 1.4fr .8fr;
-      gap: 18px;
-      align-items: center;
-    }
+    --info: #2563eb;
+    --info-bg: #eaf2ff;
 
-    .eyebrow {
-      display: inline-flex;
-      gap: 8px;
-      align-items: center;
-      padding: 8px 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(85,214,255,.24);
-      background: rgba(85,214,255,.08);
-      color: #9cecff;
-      font-size: 12px;
-      margin-bottom: 12px;
-    }
+    --shadow: 0 10px 30px rgba(16, 35, 63, 0.08);
+    --radius-xl: 24px;
+    --radius-lg: 18px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
 
-    h1, h2, h3, h4, p { margin: 0; }
+    --font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
 
-    .hero h1 {
-      font-size: clamp(28px, 3vw, 42px);
-      line-height: 1.05;
-      margin-bottom: 14px;
-      max-width: 13ch;
-    }
+  * { box-sizing: border-box; }
 
-    .hero p {
-      color: var(--muted);
-      line-height: 1.6;
-      max-width: 62ch;
-    }
+  body {
+    margin: 0;
+    background: linear-gradient(180deg, #f7f9fc 0%, #f4f7fb 100%);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100vh;
+  }
 
-    .stats {
-      display: grid;
-      gap: 12px;
-    }
+  .wrap {
+    max-width: 1380px;
+    margin: 0 auto;
+    padding: 32px 24px 48px;
+    display: grid;
+    gap: 24px;
+  }
 
-    .card {
-      background: rgba(255,255,255,.04);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 16px;
-    }
+  h1, h2, h3, h4, p { margin: 0; }
 
-    .card strong {
-      display: block;
-      font-size: 24px;
-      margin-top: 8px;
-    }
+  .hero,
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow);
+  }
 
-    .card span {
-      color: var(--muted);
-      font-size: 13px;
-    }
+  .hero {
+    padding: 28px;
+    display: grid;
+    grid-template-columns: 1.35fr 0.95fr;
+    gap: 24px;
+    align-items: center;
+  }
 
-    .panel-head {
-      padding: 20px 22px 12px;
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      align-items: flex-start;
-      flex-wrap: wrap;
-    }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--info-bg);
+    color: var(--info);
+    border: 1px solid #cfe0ff;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
 
-    .panel-head p {
-      color: var(--muted);
-      line-height: 1.55;
-      margin-top: 8px;
-      max-width: 76ch;
-    }
+  .hero h1 {
+    font-size: clamp(30px, 4vw, 46px);
+    color: var(--title);
+    line-height: 1.03;
+    max-width: 12ch;
+    margin-bottom: 12px;
+  }
 
-    .panel-body {
-      padding: 0 22px 22px;
-    }
+  .hero p {
+    color: var(--text-soft);
+    line-height: 1.7;
+    max-width: 68ch;
+  }
 
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 22px;
-    }
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 18px;
+  }
 
-    .dropzone {
-      border: 1.5px dashed rgba(134,228,255,.34);
-      border-radius: 22px;
-      padding: 28px;
-      min-height: 220px;
-      display: grid;
-      place-items: center;
-      text-align: center;
-      cursor: pointer;
-      transition: .2s ease;
-      background: linear-gradient(180deg, rgba(7,17,31,.18), rgba(255,255,255,.025));
-    }
+  .stats {
+    display: grid;
+    gap: 12px;
+  }
 
-    .dropzone:hover, .dropzone.dragover {
-      border-color: rgba(134,228,255,.56);
-      background: linear-gradient(180deg, rgba(85,214,255,.12), rgba(255,255,255,.035));
-    }
+  .stat-card {
+    background: linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 18px;
+  }
 
-    .dropzone .icon {
-      width: 64px;
-      height: 64px;
-      margin: 0 auto 12px;
-      border-radius: 18px;
-      display: grid;
-      place-items: center;
-      font-size: 30px;
-      background: linear-gradient(135deg, rgba(85,214,255,.18), rgba(79,140,255,.18));
-    }
+  .stat-card span {
+    display: block;
+    color: var(--text-soft);
+    font-size: 13px;
+  }
 
-    .dropzone p {
-      color: var(--muted);
-      line-height: 1.6;
-      max-width: 60ch;
-      margin-top: 10px;
-    }
+  .stat-card strong {
+    display: block;
+    margin-top: 8px;
+    color: var(--primary);
+    font-size: 28px;
+    font-weight: 800;
+  }
 
-    .support {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
+  .panel-head {
+    padding: 24px 24px 14px;
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
 
-    .chip {
-      padding: 7px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      color: #9cecff;
-      background: rgba(85,214,255,.08);
-      border: 1px solid rgba(85,214,255,.16);
-    }
+  .panel-head h2 {
+    color: var(--title);
+    font-size: 24px;
+    margin-bottom: 6px;
+  }
 
-    .toolbar {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
+  .panel-head p {
+    color: var(--text-soft);
+    line-height: 1.65;
+    max-width: 82ch;
+  }
 
-    .btn {
-      border: 0;
-      border-radius: 14px;
-      padding: 12px 16px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: .18s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
+  .panel-body {
+    padding: 0 24px 24px;
+  }
 
-    .btn:hover { transform: translateY(-1px); }
-    .btn.primary { background: linear-gradient(135deg, var(--cyan), var(--blue)); color: #04101d; }
-    .btn.secondary { background: rgba(255,255,255,.04); color: var(--text); border: 1px solid var(--line); }
-    .btn.ghost { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+  }
 
-    input, select, textarea {
-      width: 100%;
-      background: rgba(255,255,255,.045);
-      border: 1px solid var(--line);
-      color: var(--text);
-      border-radius: 14px;
-      padding: 12px 14px;
-      outline: none;
-      font: inherit;
-    }
+  .toolbar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
 
-    textarea {
-      min-height: 220px;
-      resize: vertical;
-    }
+  .btn {
+    appearance: none;
+    border: 0;
+    border-radius: 14px;
+    padding: 12px 16px;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+    transition: .18s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
 
-    .field {
-      display: grid;
-      gap: 8px;
-    }
+  .btn:hover { transform: translateY(-1px); }
 
-    .field label {
-      color: var(--muted);
-      font-size: 12px;
-    }
+  .btn.primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-2));
+    color: white;
+  }
 
-    .doc-list {
-      display: grid;
-      gap: 12px;
-    }
+  .btn.secondary {
+    background: white;
+    color: var(--primary);
+    border: 1px solid var(--border-strong);
+  }
 
-    .doc-item {
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.035);
-      border-radius: 18px;
-      padding: 16px;
-      display: grid;
-      gap: 10px;
-    }
+  .btn.soft {
+    background: var(--surface-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
 
-    .doc-top {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: flex-start;
-    }
+  .btn.success {
+    background: var(--success-bg);
+    color: var(--success);
+    border: 1px solid #b9e8d2;
+  }
 
-    .doc-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 8px;
-    }
+  .btn.warn {
+    background: var(--warn-bg);
+    color: var(--warn);
+    border: 1px solid #f1ddb5;
+  }
 
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      border: 1px solid transparent;
-    }
+  .dropzone {
+    border: 1.5px dashed #b8cbe4;
+    border-radius: 24px;
+    padding: 34px 26px;
+    min-height: 240px;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    background: linear-gradient(180deg, #fbfdff 0%, #f3f8ff 100%);
+    transition: .2s ease;
+    cursor: pointer;
+  }
 
-    .pill.ok { background: rgba(42,208,143,.14); color: #defef1; border-color: rgba(42,208,143,.2); }
-    .pill.partial { background: rgba(255,191,94,.14); color: #ffeed0; border-color: rgba(255,191,94,.2); }
-    .pill.error { background: rgba(255,100,130,.14); color: #ffe3ea; border-color: rgba(255,100,130,.2); }
-    .pill.info { background: rgba(79,140,255,.14); color: #dce8ff; border-color: rgba(79,140,255,.2); }
+  .dropzone:hover,
+  .dropzone.dragover {
+    border-color: #7ba3d8;
+    background: linear-gradient(180deg, #f7fbff 0%, #eef5ff 100%);
+  }
 
-    .hint, .muted {
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.55;
-    }
+  .dropzone .icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 20px;
+    display: grid;
+    place-items: center;
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--primary);
+    background: #e8f1ff;
+    margin: 0 auto 14px;
+  }
 
-    .status-box {
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.035);
-      border-radius: 18px;
-      padding: 16px;
-      display: grid;
-      gap: 12px;
-    }
+  .dropzone strong {
+    display: block;
+    font-size: 18px;
+    color: var(--title);
+  }
 
-    .progress {
-      width: 100%;
-      height: 12px;
-      border-radius: 999px;
-      overflow: hidden;
-      background: rgba(255,255,255,.06);
-    }
+  .dropzone p {
+    margin-top: 10px;
+    color: var(--text-soft);
+    line-height: 1.65;
+    max-width: 58ch;
+  }
 
-    .progress-bar {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, var(--cyan), var(--blue));
-      transition: width .2s ease;
-    }
+  .support {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
 
-    .compare-results, .preview-box {
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.035);
-      border-radius: 18px;
-      padding: 16px;
-    }
+  .chip {
+    padding: 7px 11px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid var(--border);
+    background: #f8fbff;
+    color: var(--primary);
+  }
 
-    .compare-summary {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0,1fr));
-      gap: 12px;
-      margin-bottom: 16px;
-    }
+  .field {
+    display: grid;
+    gap: 8px;
+  }
 
-    .mini {
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 14px;
-      background: rgba(255,255,255,.03);
-    }
+  .field label {
+    color: var(--text-soft);
+    font-size: 12px;
+    font-weight: 600;
+  }
 
-    .mini strong {
-      display: block;
-      font-size: 24px;
-      margin-top: 8px;
-    }
+  input, select, textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    background: white;
+    border-radius: 14px;
+    padding: 12px 14px;
+    color: var(--text);
+    font: inherit;
+    outline: none;
+  }
 
-    .diff-list {
-      display: grid;
-      gap: 10px;
-      max-height: 420px;
-      overflow: auto;
-    }
+  input:focus, select:focus, textarea:focus {
+    border-color: #8eb3e5;
+    box-shadow: 0 0 0 4px rgba(46, 91, 154, 0.08);
+  }
 
-    .diff-item {
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 12px;
-      background: rgba(255,255,255,.03);
-    }
+  textarea {
+    min-height: 250px;
+    resize: vertical;
+    line-height: 1.55;
+  }
 
-    .toast-wrap {
-      position: fixed;
-      right: 18px;
-      bottom: 18px;
-      display: grid;
-      gap: 10px;
-      z-index: 1000;
-    }
+  .status-box,
+  .preview-box,
+  .compare-results,
+  .summary-box,
+  .workspace-table-wrap {
+    border: 1px solid var(--border);
+    background: linear-gradient(180deg, #ffffff 0%, #fafcff 100%);
+    border-radius: var(--radius-lg);
+    padding: 18px;
+  }
 
-    .toast {
-      background: rgba(9,22,40,.96);
-      border: 1px solid var(--line);
-      color: var(--text);
-      padding: 12px 14px;
-      border-radius: 14px;
-      min-width: 260px;
-      box-shadow: var(--shadow);
-    }
+  .status-box h3,
+  .preview-box h3,
+  .summary-box h3 {
+    color: var(--title);
+    font-size: 20px;
+    margin-bottom: 8px;
+  }
 
-    .hidden { display: none !important; }
+  .muted,
+  .hint {
+    color: var(--text-soft);
+    line-height: 1.6;
+  }
 
-    @media (max-width: 1100px) {
-      .hero, .grid-2 { grid-template-columns: 1fr; }
-      .compare-summary { grid-template-columns: 1fr 1fr; }
-    }
+  .progress {
+    width: 100%;
+    height: 12px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: #edf2f8;
+    margin-top: 8px;
+  }
 
-    @media (max-width: 720px) {
-      .wrap { padding: 16px; }
-      .compare-summary { grid-template-columns: 1fr; }
-    }
-  </style>
+  .progress-bar {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), #5f95df);
+    transition: width .2s ease;
+  }
+
+  .workspace-table-wrap {
+    overflow: hidden;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th, td {
+    text-align: left;
+    vertical-align: top;
+    padding: 14px 12px;
+    border-bottom: 1px solid #e8eef7;
+    font-size: 14px;
+  }
+
+  th {
+    background: #f7faff;
+    color: var(--text-soft);
+    font-size: 12px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+
+  tbody tr:hover {
+    background: #fafcff;
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid transparent;
+    white-space: nowrap;
+  }
+
+  .pill.status-ok { background: var(--success-bg); color: var(--success); border-color: #bee9d4; }
+  .pill.status-partial { background: var(--warn-bg); color: var(--warn); border-color: #efd9aa; }
+  .pill.status-error { background: var(--danger-bg); color: var(--danger); border-color: #f2c7c7; }
+  .pill.status-info { background: var(--info-bg); color: var(--info); border-color: #cfe0ff; }
+
+  .pill.impact-high { background: #fdeeee; color: #b83f3f; border-color: #f3cccc; }
+  .pill.impact-medium { background: #fff6e7; color: #a96c11; border-color: #efdcaf; }
+  .pill.impact-low { background: #ebf8ef; color: #23774e; border-color: #c5e6d2; }
+
+  .impact-bar {
+    width: 100%;
+    height: 8px;
+    border-radius: 999px;
+    background: #edf2f8;
+    overflow: hidden;
+    margin-top: 6px;
+  }
+
+  .impact-bar > span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+  }
+
+  .impact-bar.high > span { width: 92%; background: linear-gradient(90deg, #e27272, #c05656); }
+  .impact-bar.medium > span { width: 60%; background: linear-gradient(90deg, #e5b453, #c08619); }
+  .impact-bar.low > span { width: 34%; background: linear-gradient(90deg, #5fb588, #1f8f5f); }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .summary-mini {
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: white;
+    padding: 16px;
+  }
+
+  .summary-mini span {
+    display: block;
+    color: var(--text-soft);
+    font-size: 13px;
+  }
+
+  .summary-mini strong {
+    display: block;
+    color: var(--primary);
+    font-size: 28px;
+    margin-top: 8px;
+  }
+
+  .summary-conclusion {
+    border: 1px solid #dbe7f7;
+    background: linear-gradient(180deg, #f8fbff 0%, #eef5ff 100%);
+    border-radius: 18px;
+    padding: 18px;
+  }
+
+  .compare-results {
+    display: grid;
+    gap: 14px;
+  }
+
+  .empty-state {
+    padding: 18px;
+    border: 1px dashed var(--border-strong);
+    border-radius: 16px;
+    background: #fbfdff;
+    color: var(--text-soft);
+  }
+
+  .toast-wrap {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    display: grid;
+    gap: 10px;
+    z-index: 1000;
+  }
+
+  .toast {
+    background: white;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 12px 14px;
+    border-radius: 14px;
+    min-width: 260px;
+    box-shadow: var(--shadow);
+  }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 1180px) {
+    .hero, .grid-2 { grid-template-columns: 1fr; }
+    .summary-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 760px) {
+    .wrap { padding: 18px 14px 32px; }
+    .summary-grid { grid-template-columns: 1fr; }
+    th:nth-child(6), td:nth-child(6) { display: none; }
+  }
+</style>
 </head>
 <body>
   <div class="wrap">
     <section class="hero">
       <div>
-        <div class="eyebrow">PDF + imágenes + OCR + comparación</div>
+        <div class="eyebrow">Análisis documental · Comparación automática · Exportación</div>
         <h1>Extractor y comparador de documentos</h1>
         <p>
-          Subí PDFs o imágenes, extraé texto embebido u OCR si hace falta, limpiá la información y compará documentos automáticamente.
+          Subí PDFs o imágenes, extraé el texto, analizá diferencias y visualizá el impacto de cada modificación en una interfaz clara, profesional y lista para producción.
         </p>
+        <div class="hero-actions">
+          <button class="btn primary" id="compareBtnHero">Comparar documentos</button>
+          <button class="btn secondary" id="downloadPdfBtn">Descargar análisis en PDF</button>
+          <button class="btn secondary" id="downloadWordBtn">Descargar análisis en Word</button>
+        </div>
       </div>
+
       <div class="stats">
-        <div class="card"><span>Documentos cargados</span><strong id="statDocs">0</strong></div>
-        <div class="card"><span>Último modo de extracción</span><strong id="statMode">—</strong></div>
-        <div class="card"><span>Bloques detectados</span><strong id="statBlocks">0</strong></div>
+        <div class="stat-card"><span>Documentos cargados</span><strong id="statDocs">0</strong></div>
+        <div class="stat-card"><span>Último modo de extracción</span><strong id="statMode">—</strong></div>
+        <div class="stat-card"><span>Bloques detectados</span><strong id="statBlocks">0</strong></div>
       </div>
     </section>
 
@@ -404,12 +532,10 @@
       <div class="panel-head">
         <div>
           <h2>Carga y extracción</h2>
-          <p>
-            Soporta PDF con texto, PDF escaneado y archivos de imagen. Si no hay texto embebido suficiente, activa OCR automáticamente.
-          </p>
+          <p>Soporta PDF con texto, PDF escaneado y archivos de imagen. Si no hay texto embebido suficiente, activa OCR automáticamente.</p>
         </div>
         <div class="toolbar">
-          <button class="btn secondary" id="clearBtn">Limpiar todo</button>
+          <button class="btn soft" id="clearBtn">Limpiar todo</button>
         </div>
       </div>
 
@@ -426,11 +552,9 @@
 
             <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Subir documentos">
               <div>
-                <div class="icon">⬆</div>
+                <div class="icon">↑</div>
                 <strong>Arrastrá archivos o hacé clic para seleccionar</strong>
-                <p>
-                  PDFs con texto se leen directamente. PDFs escaneados e imágenes pasan por OCR.
-                </p>
+                <p>PDFs con texto se leen directamente. PDFs escaneados e imágenes pasan por OCR.</p>
                 <div class="toolbar" style="justify-content:center; margin-top:14px;">
                   <button class="btn primary" type="button" id="selectBtn">Seleccionar archivos</button>
                 </div>
@@ -466,10 +590,32 @@
             </div>
           </div>
         </div>
+      </div>
+    </section>
 
-        <div style="height:18px;"></div>
-
-        <div class="doc-list" id="docList"></div>
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>Workspace y modificaciones detectadas</h2>
+          <p>Cada archivo procesado se presenta con su categoría, impacto y observaciones para una lectura rápida y profesional.</p>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="workspace-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre de la modificación</th>
+                <th>Descripción breve</th>
+                <th>Categoría</th>
+                <th>Impacto</th>
+                <th>Estado</th>
+                <th>Observación</th>
+              </tr>
+            </thead>
+            <tbody id="workspaceTableBody"></tbody>
+          </table>
+        </div>
       </div>
     </section>
 
@@ -477,11 +623,10 @@
       <div class="panel-head">
         <div>
           <h2>Comparación automática</h2>
-          <p>
-            Seleccioná dos documentos ya procesados. Si encuentra artículos, compara por artículo. Si no, compara por bloques de texto.
-          </p>
+          <p>Seleccioná dos documentos ya procesados. Si encuentra artículos, compara por artículo. Si no, compara por bloques de texto.</p>
         </div>
       </div>
+
       <div class="panel-body">
         <div class="grid-2">
           <div class="field">
@@ -493,19 +638,46 @@
             <select id="compareB"></select>
           </div>
         </div>
+
         <div style="height:14px;"></div>
+
         <div class="toolbar">
           <button class="btn primary" id="compareBtn">Comparar</button>
         </div>
+
         <div style="height:18px;"></div>
+
         <div class="compare-results" id="compareResults">
-          <p class="muted">Todavía no hiciste ninguna comparación.</p>
+          <div class="empty-state">Todavía no hiciste ninguna comparación.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>Resumen ejecutivo del análisis</h2>
+          <p>Conclusión visual y textual del estado general del análisis, impacto y hallazgos más importantes.</p>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="summary-box" id="analysisSummary">
+          <div class="empty-state">El resumen ejecutivo aparecerá después de procesar y/o comparar documentos.</div>
         </div>
       </div>
     </section>
   </div>
 
   <div class="toast-wrap" id="toastWrap"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+  <script src="https://unpkg.com/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+
+  <script>
 
  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
@@ -583,6 +755,178 @@
     function countWords(text) {
       return normalizeText(text).split(/\s+/).filter(Boolean).length;
     }
+
+function deriveImpact(doc) {
+  const text = (doc.text || "").toLowerCase();
+  const words = countWords(doc.text || "");
+
+  if (doc.status === "error") {
+    return {
+      level: "high",
+      label: "posible riesgo o advertencia",
+      category: "mejora estructural",
+      observation: doc.note || "El archivo no pudo procesarse correctamente."
+    };
+  }
+
+  if (doc.mode?.includes("OCR")) {
+    return {
+      level: "medium",
+      label: "impacto medio",
+      category: "mejora funcional",
+      observation: "Se requirió OCR; conviene revisar la calidad del texto extraído."
+    };
+  }
+
+  if (words > 1500 || /artículo|art\.|capítulo/.test(text)) {
+    return {
+      level: "high",
+      label: "impacto alto",
+      category: "mejora estructural",
+      observation: "Documento con volumen o estructura normativa relevante."
+    };
+  }
+
+  if (words > 300) {
+    return {
+      level: "medium",
+      label: "impacto medio",
+      category: "mejora funcional",
+      observation: "Contenido suficiente para comparación sustantiva."
+    };
+  }
+
+  return {
+    level: "low",
+    label: "impacto bajo",
+    category: "mejora visual",
+    observation: "Contenido breve o con baja complejidad documental."
+  };
+}
+
+function impactBar(level) {
+  return `<div class="impact-bar ${level}"><span></span></div>`;
+}
+
+function getStatusPill(status) {
+  if (status === "ok") return `<span class="pill status-ok">Procesado</span>`;
+  if (status === "partial") return `<span class="pill status-partial">Lectura parcial</span>`;
+  return `<span class="pill status-error">Error</span>`;
+}
+
+function getImpactPill(level, label) {
+  return `<span class="pill impact-${level}">${label}</span>`;
+}
+
+function buildExecutiveSummary(compareData = null) {
+  const docs = state.docs || [];
+  const processed = docs.filter(d => d.status === "ok").length;
+  const partial = docs.filter(d => d.status === "partial").length;
+  const errors = docs.filter(d => d.status === "error").length;
+
+  let important = "Todavía no hay comparación ejecutada.";
+  let conclusion = "El sistema está listo para seguir procesando y comparar documentos.";
+  let changeCount = 0;
+  let topImpact = "sin clasificar";
+
+  if (compareData) {
+    changeCount = compareData.added.length + compareData.removed.length + compareData.modified.length;
+    if (compareData.modified.length > 0) topImpact = "impacto alto";
+    else if (compareData.added.length > 0 || compareData.removed.length > 0) topImpact = "impacto medio";
+    else topImpact = "impacto bajo";
+
+    important = `
+      Se detectaron <strong>${changeCount}</strong> cambios totales:
+      <strong>${compareData.modified.length}</strong> modificados,
+      <strong>${compareData.added.length}</strong> agregados y
+      <strong>${compareData.removed.length}</strong> ausentes o eliminados.
+    `;
+
+    conclusion =
+      compareData.modified.length > 0
+        ? "La comparación muestra cambios relevantes en el contenido. Conviene revisar primero los bloques modificados porque son los que más afectan el análisis."
+        : compareData.added.length || compareData.removed.length
+          ? "La principal diferencia está en bloques agregados o ausentes. El impacto es moderado y fácil de rastrear."
+          : "No se detectaron diferencias sustantivas entre los documentos seleccionados.";
+  }
+
+  return `
+    <div class="summary-grid">
+      <div class="summary-mini"><span>Documentos procesados</span><strong>${processed}</strong></div>
+      <div class="summary-mini"><span>Lectura parcial</span><strong>${partial}</strong></div>
+      <div class="summary-mini"><span>Errores</span><strong>${errors}</strong></div>
+      <div class="summary-mini"><span>Impacto general</span><strong>${topImpact}</strong></div>
+    </div>
+
+    <div class="summary-conclusion">
+      <h3 style="margin-bottom:10px;">Conclusión general</h3>
+      <p class="hint" style="margin-bottom:10px;">${important}</p>
+      <p class="hint">${conclusion}</p>
+    </div>
+  `;
+}
+
+async function exportAnalysisToPDF() {
+  const target = document.body;
+  const canvas = await html2canvas(target, { scale: 2, backgroundColor: "#ffffff" });
+  const imgData = canvas.toDataURL("image/png");
+
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF("p", "mm", "a4");
+
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  const imgWidth = pageWidth;
+  const imgHeight = canvas.height * imgWidth / canvas.width;
+
+  let heightLeft = imgHeight;
+  let position = 0;
+
+  pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+  heightLeft -= pageHeight;
+
+  while (heightLeft > 0) {
+    position = heightLeft - imgHeight;
+    pdf.addPage();
+    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+  }
+
+  pdf.save("analisis-documental.pdf");
+}
+
+async function exportAnalysisToWord() {
+  const { Document, Packer, Paragraph, TextRun } = window.docx;
+
+  const lines = [];
+  lines.push(new Paragraph({ children: [new TextRun({ text: "Análisis documental", bold: true, size: 32 })] }));
+  lines.push(new Paragraph(" "));
+  lines.push(new Paragraph(`Documentos cargados: ${state.docs.length}`));
+  lines.push(new Paragraph(" "));
+
+  state.docs.forEach((doc, index) => {
+    const impact = deriveImpact(doc);
+    lines.push(new Paragraph({ children: [new TextRun({ text: `${index + 1}. ${doc.filename}`, bold: true })] }));
+    lines.push(new Paragraph(`Modo: ${doc.mode || "—"}`));
+    lines.push(new Paragraph(`Estado: ${doc.status}`));
+    lines.push(new Paragraph(`Categoría: ${impact.category}`));
+    lines.push(new Paragraph(`Impacto: ${impact.label}`));
+    lines.push(new Paragraph(`Observación: ${impact.observation}`));
+    lines.push(new Paragraph(" "));
+  });
+
+  const doc = new Document({
+    sections: [{ properties: {}, children: lines }]
+  });
+
+  const blob = await Packer.toBlob(doc);
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "analisis-documental.docx";
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
     function extractBlocks(text) {
       const source = normalizeText(text);
@@ -865,58 +1209,86 @@
     }
 
     function renderComparison() {
-      const resultBox = $("#compareResults");
-      const idA = $("#compareA").value;
-      const idB = $("#compareB").value;
+  const resultBox = $("#compareResults");
+  const idA = $("#compareA").value;
+  const idB = $("#compareB").value;
 
-      const docA = state.docs.find((d) => d.id === idA);
-      const docB = state.docs.find((d) => d.id === idB);
+  const docA = state.docs.find((d) => d.id === idA);
+  const docB = state.docs.find((d) => d.id === idB);
 
-      if (!docA || !docB) {
-        resultBox.innerHTML = `<p class="muted">Seleccioná dos documentos válidos para comparar.</p>`;
-        return;
-      }
+  if (!docA || !docB) {
+    resultBox.innerHTML = `<div class="empty-state">Seleccioná dos documentos válidos para comparar.</div>`;
+    $("#analysisSummary").innerHTML = buildExecutiveSummary(null);
+    return;
+  }
 
-      const result = compareDocs(docA, docB);
+  const result = compareDocs(docA, docB);
 
-      resultBox.innerHTML = `
-        <div class="compare-summary">
-          <div class="mini"><span>Bloques en A</span><strong>${result.totalA}</strong></div>
-          <div class="mini"><span>Bloques en B</span><strong>${result.totalB}</strong></div>
-          <div class="mini"><span>Agregados en B</span><strong>${result.added.length}</strong></div>
-          <div class="mini"><span>Eliminados o ausentes</span><strong>${result.removed.length}</strong></div>
-        </div>
+  resultBox.innerHTML = `
+    <div class="summary-grid">
+      <div class="summary-mini"><span>Bloques en A</span><strong>${result.totalA}</strong></div>
+      <div class="summary-mini"><span>Bloques en B</span><strong>${result.totalB}</strong></div>
+      <div class="summary-mini"><span>Agregados</span><strong>${result.added.length}</strong></div>
+      <div class="summary-mini"><span>Modificados</span><strong>${result.modified.length}</strong></div>
+    </div>
 
-        <div class="mini" style="margin-bottom:12px;">
-          <span>Bloques modificados</span>
-          <strong>${result.modified.length}</strong>
-        </div>
-
-        <div class="diff-list">
+    <div class="workspace-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre de la modificación</th>
+            <th>Descripción breve</th>
+            <th>Categoría</th>
+            <th>Impacto</th>
+            <th>Estado</th>
+            <th>Observación</th>
+          </tr>
+        </thead>
+        <tbody>
           ${result.added.map((item) => `
-            <div class="diff-item">
-              <strong>Agregado: ${escapeHtml(item.b.title)}</strong>
-              <div class="hint" style="margin-top:8px;">${escapeHtml(item.b.content.slice(0, 500))}</div>
-            </div>
+            <tr>
+              <td><strong>${escapeHtml(item.b.title)}</strong></td>
+              <td>Bloque presente en B y ausente en A.</td>
+              <td><span class="pill status-info">mejora estructural</span></td>
+              <td>${getImpactPill("medium", "impacto medio")}${impactBar("medium")}</td>
+              <td><span class="pill status-ok">Agregado</span></td>
+              <td><span class="hint">${escapeHtml(item.b.content.slice(0, 180))}</span></td>
+            </tr>
           `).join("")}
 
           ${result.removed.map((item) => `
-            <div class="diff-item">
-              <strong>Ausente en B: ${escapeHtml(item.a.title)}</strong>
-              <div class="hint" style="margin-top:8px;">${escapeHtml(item.a.content.slice(0, 500))}</div>
-            </div>
+            <tr>
+              <td><strong>${escapeHtml(item.a.title)}</strong></td>
+              <td>Bloque presente en A y ausente en B.</td>
+              <td><span class="pill status-info">posible riesgo o advertencia</span></td>
+              <td>${getImpactPill("medium", "impacto medio")}${impactBar("medium")}</td>
+              <td><span class="pill status-error">Ausente en B</span></td>
+              <td><span class="hint">${escapeHtml(item.a.content.slice(0, 180))}</span></td>
+            </tr>
           `).join("")}
 
           ${result.modified.map((item) => `
-            <div class="diff-item">
-              <strong>Modificado: ${escapeHtml(item.a.title)}</strong>
-              <div class="hint" style="margin-top:8px;"><strong>A:</strong> ${escapeHtml(item.a.content.slice(0, 300))}</div>
-              <div class="hint" style="margin-top:8px;"><strong>B:</strong> ${escapeHtml(item.b.content.slice(0, 300))}</div>
-            </div>
+            <tr>
+              <td><strong>${escapeHtml(item.a.title)}</strong></td>
+              <td>El contenido del bloque cambió entre ambas versiones.</td>
+              <td><span class="pill status-info">mejora funcional</span></td>
+              <td>${getImpactPill("high", "impacto alto")}${impactBar("high")}</td>
+              <td><span class="pill status-partial">Modificado</span></td>
+              <td>
+                <span class="hint">
+                  <strong>A:</strong> ${escapeHtml(item.a.content.slice(0, 120))}<br>
+                  <strong>B:</strong> ${escapeHtml(item.b.content.slice(0, 120))}
+                </span>
+              </td>
+            </tr>
           `).join("")}
-        </div>
-      `;
-    }
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  $("#analysisSummary").innerHTML = buildExecutiveSummary(result);
+}
 
     function escapeHtml(str) {
       return String(str ?? "").replace(/[&<>"']/g, (m) => ({
@@ -928,31 +1300,48 @@
       }[m]));
     }
 
-    function renderDocList() {
-      const list = $("#docList");
+   function renderDocList() {
+  const tableBody = $("#workspaceTableBody");
+  if (!state.docs.length) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="6">
+          <div class="empty-state">Todavía no hay documentos cargados.</div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
 
-      if (!state.docs.length) {
-        list.innerHTML = `<div class="doc-item"><p class="muted">Todavía no hay documentos cargados.</p></div>`;
-        return;
-      }
+  tableBody.innerHTML = state.docs.map((doc) => {
+    const impact = deriveImpact(doc);
 
-      list.innerHTML = state.docs.map((doc) => `
-        <div class="doc-item">
-          <div class="doc-top">
-            <div>
-              <strong>${escapeHtml(doc.filename)}</strong>
-              <div class="doc-meta">
-                <span class="pill ${getDocStatusClass(doc.status)}">${getDocStatusLabel(doc.status)}</span>
-                <span class="pill info">${escapeHtml(doc.mode || "—")}</span>
-                <span class="pill info">${doc.blocks.length} bloque(s)</span>
-              </div>
-            </div>
-          </div>
-          <div class="hint">${escapeHtml(doc.note || "Sin observaciones")}</div>
-          <div class="hint">${countWords(doc.text)} palabra(s) extraída(s)</div>
-        </div>
-      `).join("");
-    }
+    return `
+      <tr>
+        <td>
+          <strong>${escapeHtml(doc.filename)}</strong>
+        </td>
+        <td>
+          Documento procesado en modo <strong>${escapeHtml(doc.mode || "—")}</strong><br>
+          <span class="hint">${countWords(doc.text)} palabra(s) extraída(s)</span>
+        </td>
+        <td>
+          <span class="pill status-info">${escapeHtml(impact.category)}</span>
+        </td>
+        <td>
+          ${getImpactPill(impact.level, impact.label)}
+          ${impactBar(impact.level)}
+        </td>
+        <td>
+          ${getStatusPill(doc.status)}
+        </td>
+        <td>
+          <span class="hint">${escapeHtml(impact.observation)}</span>
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
 
     function renderPreviewOptions() {
       const selects = [$("#previewSelect"), $("#compareA"), $("#compareB")];
@@ -991,10 +1380,11 @@
     }
 
     function renderAll() {
-      renderDocList();
-      renderPreviewOptions();
-      renderStats();
-    }
+  renderDocList();
+  renderPreviewOptions();
+  renderStats();
+  $("#analysisSummary").innerHTML = buildExecutiveSummary(null);
+}
 
     function bindEvents() {
       const input = $("#fileInput");
@@ -1063,7 +1453,13 @@
 
       $("#compareBtn").addEventListener("click", renderComparison);
       $("#clearBtn").addEventListener("click", clearState);
-    }
+    
+$("#downloadPdfBtn").addEventListener("click", exportAnalysisToPDF);
+$("#downloadWordBtn").addEventListener("click", exportAnalysisToWord);
+$("#compareBtnHero").addEventListener("click", () => {
+  document.querySelector("#compareA")?.scrollIntoView({ behavior: "smooth", block: "center" });
+});
+}
 
     loadState();
     bindEvents();
