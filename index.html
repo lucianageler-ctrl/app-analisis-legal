@@ -513,7 +513,7 @@
 
   <script>
     const MAX_FILE_SIZE_MB = 25;
-    const MAX_PDF_PAGES = 50;
+    const MAX_PDF_PAGES = 500;
     const NATIVE_TEXT_THRESHOLD = 120;
     const STORAGE_KEY = "doc-extractor-compare-v1";
 
@@ -646,8 +646,8 @@
       const pdf = await window.pdfjsLib.getDocument({ data: buffer }).promise;
 
       if (pdf.numPages > MAX_PDF_PAGES) {
-        throw new Error(`PDF demasiado largo. Máximo recomendado: ${MAX_PDF_PAGES} páginas.`);
-      }
+  toast(`PDF largo detectado (${pdf.numPages} páginas). El procesamiento puede tardar bastante.`);
+}
 
       let fullText = "";
 
