@@ -652,28 +652,29 @@
   <div class="toast-wrap" id="toastWrap"></div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
-  <script src="https://unpkg.com/tesseract.js@5/dist/tesseract.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-  <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
-
-  <script>
-
- <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
 <script src="https://unpkg.com/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
 
-  <script>
+<script>
     const MAX_FILE_SIZE_MB = 150;
-    const MAX_PDF_PAGES = 500;
-    const NATIVE_TEXT_THRESHOLD = 120;
-    const STORAGE_KEY = "doc-extractor-compare-v1";
+const MAX_PDF_PAGES = 500;
+const NATIVE_TEXT_THRESHOLD = 120;
+const STORAGE_KEY = "doc-extractor-compare-v1";
 
-    const state = {
-      docs: [],
-      selectedPreviewId: null
-    };
+const OCR_LANG = "spa+eng";
+const OCR_PDF_RENDER_SCALE = 1.5;
+const OCR_IMAGE_MAX_SIDE = 2200;
+
+const extractionCache = new Map();
+
+const state = {
+  docs: [],
+  selectedPreviewId: null,
+  ocrWorkerPromise: null
+};
 
     const $ = (selector) => document.querySelector(selector);
     const uid = () => Math.random().toString(36).slice(2, 10);
@@ -736,6 +737,81 @@
     function countWords(text) {
       return normalizeText(text).split(/\s+/).filter(Boolean).length;
     }
+
+function getFileFingerprint(file) {
+  return `${file.name}::${file.size}::${file.lastModified}`;
+}
+
+async function getOcrWorker() {
+  if (!state.ocrWorkerPromise) {
+    state.ocrWorkerPromise = window.Tesseract.createWorker(OCR_LANG);
+  }
+  return state.ocrWorkerPromise;
+}
+
+function prepareImageForOCR(source, maxSide = OCR_IMAGE_MAX_SIDE) {
+  const sourceWidth = source.naturalWidth || source.videoWidth || source.width;
+  const sourceHeight = source.naturalHeight || source.videoHeight || source.height;
+
+  const scale = Math.min(1, maxSide / Math.max(sourceWidth, sourceHeight));
+  const targetWidth = Math.max(1, Math.round(sourceWidth * scale));
+  const targetHeight = Math.max(1, Math.round(sourceHeight * scale));
+
+  const canvas = document.createElement("canvas");
+  canvas.width = targetWidth;
+  canvas.height = targetHeight;
+
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  ctx.drawImage(source, 0, 0, targetWidth, targetHeight);
+
+  const imageData = ctx.getImageData(0, 0, targetWidth, targetHeight);
+  const data = imageData.data;
+
+  for (let i = 0; i < data.length; i += 4) {
+    const gray = Math.round(data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114);
+    data[i] = gray;
+    data[i + 1] = gray;
+    data[i + 2] = gray;
+  }
+
+  ctx.putImageData(imageData, 0, 0);
+  return canvas;
+}
+
+async function fileToImageElement(file) {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => resolve(image);
+      image.onerror = () => reject(new Error("No se pudo cargar la imagen para OCR."));
+      image.src = url;
+    });
+    return img;
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+async function detectPdfNativeText(pdf, threshold = NATIVE_TEXT_THRESHOLD, maxPagesToCheck = 3) {
+  let sampleText = "";
+  const pagesToCheck = Math.min(pdf.numPages, maxPagesToCheck);
+
+  for (let pageNum = 1; pageNum <= pagesToCheck; pageNum++) {
+    setStatus(`Detectando texto embebido: página ${pageNum}/${pagesToCheck}...`, (pageNum / pagesToCheck) * 15);
+
+    const page = await pdf.getPage(pageNum);
+    const content = await page.getTextContent();
+    const pageText = content.items.map((item) => item.str).join(" ");
+    sampleText += `\n\n${pageText}`;
+
+    if (normalizeText(sampleText).length >= threshold) {
+      return true;
+    }
+  }
+
+  return false;
+}
 
 function toSentenceCase(value) {
   const clean = normalizeText(value || "");
@@ -1062,133 +1138,159 @@ async function exportAnalysisToWord() {
     }
 
     async function readPdfNative(file) {
-      const buffer = await file.arrayBuffer();
-      const pdf = await window.pdfjsLib.getDocument({ data: buffer }).promise;
+  const buffer = await file.arrayBuffer();
+  const pdf = await window.pdfjsLib.getDocument({ data: buffer }).promise;
 
-      if (pdf.numPages > MAX_PDF_PAGES) {
-  toast(`PDF largo detectado (${pdf.numPages} páginas). El procesamiento puede tardar bastante.`);
+  if (pdf.numPages > MAX_PDF_PAGES) {
+    toast(`PDF largo detectado (${pdf.numPages} páginas). El procesamiento puede tardar bastante.`);
+  }
+
+  let fullText = "";
+
+  for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+    setStatus(`Extrayendo texto completo del PDF: página ${pageNum}/${pdf.numPages}...`, 20 + (pageNum / pdf.numPages) * 35);
+    const page = await pdf.getPage(pageNum);
+    const content = await page.getTextContent();
+    const pageText = content.items.map((item) => item.str).join(" ");
+    fullText += `\n\n${pageText}`;
+  }
+
+  return {
+    text: normalizeText(fullText),
+    pages: pdf.numPages,
+    pdf
+  };
 }
 
-      let fullText = "";
-
-      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-        setStatus(`Leyendo PDF: página ${pageNum}/${pdf.numPages}...`, (pageNum / pdf.numPages) * 40);
-        const page = await pdf.getPage(pageNum);
-        const content = await page.getTextContent();
-        const pageText = content.items.map((item) => item.str).join(" ");
-        fullText += `\n\n${pageText}`;
-      }
-
-      return {
-        text: normalizeText(fullText),
-        pages: pdf.numPages,
-        pdf
-      };
-    }
-
     async function ocrPdf(pdf) {
-      let fullText = "";
+  const worker = await getOcrWorker();
+  let fullText = "";
 
-      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-        setStatus(`Aplicando OCR a PDF: página ${pageNum}/${pdf.numPages}...`, 40 + (pageNum / pdf.numPages) * 55);
+  const renderCanvas = document.createElement("canvas");
+  const renderCtx = renderCanvas.getContext("2d", { willReadFrequently: true });
 
-        const page = await pdf.getPage(pageNum);
-        const viewport = page.getViewport({ scale: 2 });
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
+  for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+    setStatus(`Aplicando OCR a PDF: página ${pageNum}/${pdf.numPages}...`, 40 + (pageNum / pdf.numPages) * 55);
 
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
+    const page = await pdf.getPage(pageNum);
+    const viewport = page.getViewport({ scale: OCR_PDF_RENDER_SCALE });
 
-        await page.render({
-          canvasContext: ctx,
-          viewport
-        }).promise;
+    renderCanvas.width = Math.ceil(viewport.width);
+    renderCanvas.height = Math.ceil(viewport.height);
 
-        const result = await window.Tesseract.recognize(canvas, "spa+eng", {
-          logger: () => {}
-        });
+    await page.render({
+      canvasContext: renderCtx,
+      viewport
+    }).promise;
 
-        fullText += `\n\n${result.data.text || ""}`;
-      }
+    const preparedCanvas = prepareImageForOCR(renderCanvas);
+    const result = await worker.recognize(preparedCanvas);
 
-      return normalizeText(fullText);
-    }
+    fullText += `\n\n${result.data.text || ""}`;
+
+    preparedCanvas.width = 1;
+    preparedCanvas.height = 1;
+    renderCanvas.width = 1;
+    renderCanvas.height = 1;
+  }
+
+  return normalizeText(fullText);
+}
 
     async function processPdf(file) {
-      if (!window.pdfjsLib) {
-        throw new Error("PDF.js no se cargó correctamente.");
-      }
-      if (!window.Tesseract) {
-        throw new Error("Tesseract.js no se cargó correctamente.");
-      }
+  if (!window.pdfjsLib) {
+    throw new Error("PDF.js no se cargó correctamente.");
+  }
+  if (!window.Tesseract) {
+    throw new Error("Tesseract.js no se cargó correctamente.");
+  }
 
-      const native = await readPdfNative(file);
+  const buffer = await file.arrayBuffer();
+  const pdf = await window.pdfjsLib.getDocument({ data: buffer }).promise;
 
-      if (native.text && native.text.length >= NATIVE_TEXT_THRESHOLD) {
-        return {
-          text: native.text,
-          mode: "PDF con texto embebido",
-          status: "ok",
-          note: `PDF leído sin OCR (${native.pages} páginas)`
-        };
-      }
+  const hasNativeText = await detectPdfNativeText(pdf);
 
-      setStatus("PDF escaneado detectado. Aplicando OCR...", 45);
-      const ocrText = await ocrPdf(native.pdf);
+  if (hasNativeText) {
+    const native = await readPdfNative(file);
 
-      if (!ocrText) {
-        throw new Error("OCR completado, pero no se detectó texto en el PDF.");
-      }
-
-      return {
-        text: ocrText,
-        mode: "PDF escaneado + OCR",
-        status: "partial",
-        note: `PDF procesado con OCR (${native.pages} páginas)`
-      };
+    if (!native.text) {
+      throw new Error("El PDF parecía tener texto embebido, pero no se pudo extraer contenido útil.");
     }
 
-    async function processImage(file) {
-      if (!window.Tesseract) {
-        throw new Error("Tesseract.js no se cargó correctamente.");
-      }
+    return {
+      text: native.text,
+      mode: "PDF con texto embebido",
+      status: "ok",
+      note: `PDF leído completo sin OCR (${native.pages} páginas)`
+    };
+  }
 
-      setStatus(`Aplicando OCR a imagen: ${file.name}...`, 25);
+  setStatus("PDF escaneado detectado. Aplicando OCR completo...", 45);
+  const ocrText = await ocrPdf(pdf);
 
-      const result = await window.Tesseract.recognize(file, "spa+eng", {
-        logger: () => {}
-      });
+  if (!ocrText) {
+    throw new Error("OCR completado, pero no se detectó texto en el PDF.");
+  }
 
-      const text = normalizeText(result.data.text || "");
+  return {
+    text: ocrText,
+    mode: "PDF escaneado + OCR",
+    status: "partial",
+    note: `PDF procesado completo con OCR (${pdf.numPages} páginas)`
+  };
+}
 
-      if (!text) {
-        throw new Error("La imagen no contiene texto detectable.");
-      }
+   async function processImage(file) {
+  if (!window.Tesseract) {
+    throw new Error("Tesseract.js no se cargó correctamente.");
+  }
 
-      return {
-        text,
-        mode: "Imagen + OCR",
-        status: "partial",
-        note: "Texto extraído desde imagen"
-      };
-    }
+  setStatus(`Aplicando OCR a imagen: ${file.name}...`, 25);
+
+  const worker = await getOcrWorker();
+  const imageEl = await fileToImageElement(file);
+  const preparedCanvas = prepareImageForOCR(imageEl);
+  const result = await worker.recognize(preparedCanvas);
+
+  const text = normalizeText(result.data.text || "");
+
+  preparedCanvas.width = 1;
+  preparedCanvas.height = 1;
+
+  if (!text) {
+    throw new Error("La imagen no contiene texto detectable.");
+  }
+
+  return {
+    text,
+    mode: "Imagen + OCR",
+    status: "partial",
+    note: "Texto extraído desde imagen"
+  };
+}
 
     async function extractFile(file) {
-      validateFile(file);
+  validateFile(file);
 
-      const ext = (file.name.split(".").pop() || "").toLowerCase();
+  const cacheKey = getFileFingerprint(file);
+  if (extractionCache.has(cacheKey)) {
+    return extractionCache.get(cacheKey);
+  }
 
-      if (ext === "pdf") {
-        return processPdf(file);
-      }
+  const ext = (file.name.split(".").pop() || "").toLowerCase();
+  let payload;
 
-      if (["jpg", "jpeg", "png", "webp"].includes(ext)) {
-        return processImage(file);
-      }
+  if (ext === "pdf") {
+    payload = await processPdf(file);
+  } else if (["jpg", "jpeg", "png", "webp"].includes(ext)) {
+    payload = await processImage(file);
+  } else {
+    throw new Error("Formato no soportado.");
+  }
 
-      throw new Error("Formato no soportado.");
-    }
+  extractionCache.set(cacheKey, payload);
+  return payload;
+}
 
     function addDoc(file, payload) {
       const blocks = extractBlocks(payload.text);
