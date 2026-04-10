@@ -599,36 +599,7 @@
       </div>
     </section>
 
-    <section class="panel">
-      <div class="panel-head">
-        <div>
-          <h2>Workspace y modificaciones detectadas</h2>
-          <p>Cada archivo procesado se presenta con su categoría, impacto y observaciones para una lectura rápida y profesional.</p>
-        </div>
-      </div>
-      <div class="panel-body">
-        <div class="workspace-table-wrap">
-          <table>
-               <thead>
-              <tr>
-                <th>ARTÍCULO / SECCIÓN</th>
-                <th>TIPO DE CAMBIO</th>
-                <th>DESCRIPCIÓN DEL CAMBIO</th>
-                <th>TEXTO ANTES (PROYECTO ORIGINAL)</th>
-                <th>TEXTO DESPUÉS (VERSIÓN MODIFICADA / SANCIONADA)</th>
-                <th>CATEGORÍA TEMÁTICA</th>
-                <th>IMPACTO JURÍDICO</th>
-                <th>IMPACTO PRÁCTICO</th>
-                <th>RELEVANCIA POLÍTICA</th>
-                <th>OBSERVACIÓN</th>
-              </tr>
-            </thead>
-            <tbody id="workspaceTableBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
+   
     <section class="panel">
       <div class="panel-head">
         <div>
@@ -1426,6 +1397,8 @@ async function exportAnalysisToWord() {
 
    function renderDocList() {
   const tableBody = $("#workspaceTableBody");
+  if (!tableBody) return;
+
   if (!state.docs.length) {
     tableBody.innerHTML = `
       <tr>
