@@ -1,4 +1,4 @@
-const GEMINI_API_KEY = AIzaSyCik4e64AnOhkzDzzi - fWjdgz8oBUCUuh4;
+const GEMINI_API_KEY = "AIzaSyCik4e64AnOhkzDzzi-fWjdgz8oBUCUuh4";
 
 
 function fileToBase64(file) {
