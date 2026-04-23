@@ -1,4 +1,17 @@
-const GEMINI_API_KEY = window.ENV?.GEMINI_API_KEY || "";
+let GEMINI_API_KEY = window.ENV?.GEMINI_API_KEY || localStorage.getItem("gemini_api_key") || "";
+
+function getApiKey() {
+  if (!GEMINI_API_KEY) {
+    const key = prompt("Para extraer texto se requiere Gemini 1.5 Flash.\n\nPor favor, ingresa tu API Key:");
+    if (key) {
+      GEMINI_API_KEY = key.trim();
+      localStorage.setItem("gemini_api_key", GEMINI_API_KEY);
+    } else {
+      throw new Error("Se requiere una API Key de Gemini para continuar.");
+    }
+  }
+  return GEMINI_API_KEY;
+}
 
 
 function fileToBase64(file) {
@@ -29,7 +42,7 @@ async function extractFile(file) {
 
     setStatus(`Procesando con Gemini 1.5 Flash...`, 60);
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${getApiKey()}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
