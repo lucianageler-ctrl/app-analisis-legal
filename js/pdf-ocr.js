@@ -1,6 +1,6 @@
 import { extractionCache } from './config.js?v=3.0';
 import { setStatus, toast } from './utils.js?v=3.0';
-import { upload } from 'https://esm.sh/@vercel/blob/client?bundle';
+import { upload } from 'https://esm.sh/@vercel/blob@0.23.0/client?bundle';
 
 export async function extractFile(file) {
   console.log(`[FRONTEND] Iniciando extracción para el archivo: ${file.name} (Tamaño: ${file.size} bytes)`);
@@ -16,9 +16,10 @@ export async function extractFile(file) {
 
     // 1. Subir archivo a Vercel Blob directamente desde el cliente
     setStatus(`Subiendo ${file.name} (esto puede tomar un tiempo para archivos grandes)...`, 20);
-    console.log(`[FRONTEND] Subiendo archivo a Vercel Blob...`);
+    // Limpiamos el nombre de archivo para evitar errores de CORS/400 en Vercel Blob por caracteres especiales
+    const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
     
-    const blob = await upload(file.name, file, {
+    const blob = await upload(safeName, file, {
       access: 'public',
       handleUploadUrl: '/api/upload', // Nuestro nuevo endpoint de backend que autoriza la subida
     });
