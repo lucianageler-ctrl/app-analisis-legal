@@ -22,6 +22,7 @@ export async function extractFile(file) {
     const blob = await upload(safeName, file, {
       access: 'public',
       handleUploadUrl: '/api/upload', // Nuestro nuevo endpoint de backend que autoriza la subida
+      multipart: true // REQUERIDO para archivos pesados
     });
 
     console.log(`[FRONTEND] Archivo subido exitosamente a Vercel Blob: ${blob.url}`);
