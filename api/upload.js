@@ -27,10 +27,7 @@ module.exports = async function handler(req, res) {
           allowedContentTypes: ['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'application/json', 'text/plain'],
           maximumSizeInBytes: 100 * 1024 * 1024, // 100MB
         };
-      },
-      onUploadCompleted: async ({ blob, tokenPayload }) => {
-        console.log('[BACKEND] Vercel Blob subida completada:', blob.url);
-      },
+      }
     });
 
     return res.status(200).json(jsonResponse);
