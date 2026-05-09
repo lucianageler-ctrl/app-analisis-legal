@@ -26,7 +26,6 @@ module.exports = async function handler(req, res) {
         return {
           allowedContentTypes: ['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'application/json', 'text/plain'],
           maximumSizeInBytes: 100 * 1024 * 1024, // 100MB
-          validUntil: Date.now() + 1000 * 60 * 10, // Token válido por 10 minutos
         };
       },
       onUploadCompleted: async ({ blob, tokenPayload }) => {
