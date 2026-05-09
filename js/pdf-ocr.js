@@ -1,17 +1,6 @@
 import { extractionCache } from './config.js?v=3.0';
 import { setStatus, toast } from './utils.js?v=3.0';
-
-function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      const base64String = reader.result.split(',')[1];
-      resolve(base64String);
-    };
-    reader.onerror = error => reject(error);
-  });
-}
+import { upload } from 'https://esm.sh/@vercel/blob/client?bundle';
 
 export async function extractFile(file) {
   console.log(`[FRONTEND] Iniciando extracción para el archivo: ${file.name} (Tamaño: ${file.size} bytes)`);
@@ -22,13 +11,22 @@ export async function extractFile(file) {
     return extractionCache.get(cacheKey);
   }
 
-  setStatus(`Subiendo ${file.name} al backend...`, 20);
-
   try {
-    const base64Data = await fileToBase64(file);
     const mimeType = file.type || "application/pdf";
 
-    setStatus(`Procesando con Gemini 1.5 Flash...`, 60);
+    // 1. Subir archivo a Vercel Blob directamente desde el cliente
+    setStatus(`Subiendo ${file.name} (esto puede tomar un tiempo para archivos grandes)...`, 20);
+    console.log(`[FRONTEND] Subiendo archivo a Vercel Blob...`);
+    
+    const blob = await upload(file.name, file, {
+      access: 'public',
+      handleUploadUrl: '/api/upload', // Nuestro nuevo endpoint de backend que autoriza la subida
+    });
+
+    console.log(`[FRONTEND] Archivo subido exitosamente a Vercel Blob: ${blob.url}`);
+
+    // 2. Llamar a nuestro backend para que lo descargue y lo mande a Gemini
+    setStatus(`Procesando con Gemini 2.5 Flash...`, 60);
     console.log(`[FRONTEND] Enviando POST a /api/extract | MimeType: ${mimeType}`);
 
     const response = await fetch("/api/extract", {
@@ -38,7 +36,7 @@ export async function extractFile(file) {
       },
       body: JSON.stringify({
         mimeType: mimeType,
-        data: base64Data
+        blobUrl: blob.url // IMPORTANTE: Ahora enviamos la URL en vez del Base64 gigantesco
       })
     });
 
@@ -71,9 +69,9 @@ export async function extractFile(file) {
 
     const payload = {
       text: extractedText,
-      mode: "Gemini 1.5 Flash",
+      mode: "Gemini 2.5 Flash",
       status: "ok",
-      note: "Extraído vía Inteligencia Artificial (Gemini)"
+      note: "Extraído vía IA (Gemini 2.5 Flash) usando Vercel Blob"
     };
 
     extractionCache.set(cacheKey, payload);
