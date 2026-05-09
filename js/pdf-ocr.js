@@ -1,6 +1,6 @@
 import { extractionCache } from './config.js?v=3.0';
 import { setStatus, toast } from './utils.js?v=3.0';
-import { upload } from 'https://esm.sh/@vercel/blob@0.23.0/client?bundle';
+// No usamos esm.sh import para evitar bugs de bundler
 
 export async function extractFile(file) {
   console.log(`[FRONTEND] Iniciando extracción para el archivo: ${file.name} (Tamaño: ${file.size} bytes)`);
@@ -19,12 +19,40 @@ export async function extractFile(file) {
     // Limpiamos el nombre de archivo para evitar errores de CORS/400 en Vercel Blob por caracteres especiales
     const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
     
-    const blob = await upload(safeName, file, {
-      access: 'public',
-      handleUploadUrl: '/api/upload', // Nuestro nuevo endpoint de backend que autoriza la subida
-      multipart: file.size > 5 * 1024 * 1024 // Multipart solo si es mayor a 5MB, sino falla en Vercel/S3
+    // 1. Pedir Token al backend
+    setStatus(`Obteniendo permisos para ${safeName}...`, 10);
+    const tokenRes = await fetch('/api/upload', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'blob.generate-client-token',
+        payload: { pathname: safeName, callbackUrl: 'http://localhost', clientPayload: '' } // callbackUrl dummy
+      })
+    });
+    
+    if (!tokenRes.ok) throw new Error("Fallo al obtener token de subida");
+    const tokenData = await tokenRes.json();
+    const clientToken = tokenData.clientToken;
+
+    // 2. Subir directamente a Vercel Blob usando fetch (evita bugs de esm.sh)
+    setStatus(`Subiendo ${file.name} a la nube...`, 20);
+    const blobRes = await fetch(`https://blob.vercel-storage.com/${safeName}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${clientToken}`,
+        'x-api-version': '7',
+        'Content-Type': mimeType
+      },
+      body: file
     });
 
+    if (!blobRes.ok) {
+      const errorText = await blobRes.text();
+      console.error("[FRONTEND] Vercel Blob rechazó la subida:", errorText);
+      throw new Error(`Vercel Blob rechazó el archivo: HTTP ${blobRes.status}`);
+    }
+
+    const blob = await blobRes.json();
     console.log(`[FRONTEND] Archivo subido exitosamente a Vercel Blob: ${blob.url}`);
 
     // 2. Llamar a nuestro backend para que lo descargue y lo mande a Gemini
