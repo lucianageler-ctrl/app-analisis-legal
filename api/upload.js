@@ -1,5 +1,3 @@
-const { handleUpload } = require('@vercel/blob/client');
-
 module.exports = async function handler(req, res) {
   // CORS configuration
   res.setHeader("Access-Control-Allow-Credentials", true);
@@ -15,24 +13,42 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: "Método no permitido" });
   }
 
-  try {
-    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    return res.status(500).json({ error: "GEMINI_API_KEY no configurada." });
+  }
 
-    const jsonResponse = await handleUpload({
-      body: body,
-      request: req,
-      onBeforeGenerateToken: async (pathname, clientPayload) => {
-        // Configuramos los límites y permisos de la subida directa del cliente
-        return {
-          allowedContentTypes: ['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'application/json', 'text/plain'],
-          maximumSizeInBytes: 50 * 1024 * 1024, // 50MB (Límite máximo para cuentas gratuitas de Vercel)
-        };
-      }
+  try {
+    const { pathname, mimeType, size } = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+
+    // Inicializamos una sesión de subida resumible en Gemini (Resumable Upload)
+    const initRes = await fetch(`https://generativelanguage.googleapis.com/upload/v1beta/files?uploadType=resumable&key=${apiKey}`, {
+      method: 'POST',
+      headers: {
+        'X-Goog-Upload-Protocol': 'resumable',
+        'X-Goog-Upload-Command': 'start',
+        'X-Goog-Upload-Header-Content-Length': size.toString(),
+        'X-Goog-Upload-Header-Content-Type': mimeType,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ file: { displayName: pathname } })
     });
 
-    return res.status(200).json(jsonResponse);
+    if (!initRes.ok) {
+      const errorText = await initRes.text();
+      throw new Error(`Fallo al iniciar sesión en Gemini: ${errorText}`);
+    }
+
+    // Google devuelve la URL de subida segura en los encabezados
+    const uploadUrl = initRes.headers.get('x-goog-upload-url');
+
+    if (!uploadUrl) {
+      throw new Error("Gemini no devolvió una URL de subida válida.");
+    }
+
+    return res.status(200).json({ uploadUrl });
   } catch (error) {
-    console.error('[BACKEND] Error al generar token de Vercel Blob:', error);
+    console.error('[BACKEND] Error al inicializar Gemini Upload:', error);
     return res.status(400).json({ error: error.message });
   }
 };

@@ -16,31 +16,30 @@ export async function extractFile(file) {
 
     // 1. Subir archivo a Vercel Blob directamente desde el cliente
     setStatus(`Subiendo ${file.name} (esto puede tomar un tiempo para archivos grandes)...`, 20);
-    // Limpiamos el nombre de archivo para evitar errores de CORS/400 en Vercel Blob por caracteres especiales
     const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
     
-    // 1. Pedir Token al backend
+    // 1. Pedir URL de subida segura a Gemini (pasando por nuestro backend para ocultar la API Key)
     setStatus(`Obteniendo permisos para ${safeName}...`, 10);
     const tokenRes = await fetch('/api/upload', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        type: 'blob.generate-client-token',
-        payload: { pathname: safeName, callbackUrl: 'http://localhost', clientPayload: '' } // callbackUrl dummy
+        pathname: safeName,
+        mimeType: mimeType,
+        size: file.size
       })
     });
     
-    if (!tokenRes.ok) throw new Error("Fallo al obtener token de subida");
-    const tokenData = await tokenRes.json();
-    const clientToken = tokenData.clientToken;
+    if (!tokenRes.ok) throw new Error("Fallo al inicializar subida en Gemini");
+    const { uploadUrl } = await tokenRes.json();
 
-    // 2. Subir directamente a Vercel Blob usando fetch (evita bugs de esm.sh)
-    setStatus(`Subiendo ${file.name} a la nube...`, 20);
-    const blobRes = await fetch(`https://blob.vercel-storage.com/${safeName}`, {
+    // 2. Subir directamente el archivo pesado a los servidores de Google Gemini (Bypass de Vercel)
+    setStatus(`Subiendo ${file.name} directamente a Google Gemini (hasta 100MB soportados)...`, 20);
+    const blobRes = await fetch(uploadUrl, {
       method: 'PUT',
       headers: {
-        'Authorization': `Bearer ${clientToken}`,
-        'x-api-version': '7',
+        'X-Goog-Upload-Offset': '0',
+        'X-Goog-Upload-Command': 'upload, finalize',
         'Content-Type': mimeType
       },
       body: file
@@ -48,14 +47,16 @@ export async function extractFile(file) {
 
     if (!blobRes.ok) {
       const errorText = await blobRes.text();
-      console.error("[FRONTEND] Vercel Blob rechazó la subida:", errorText);
-      throw new Error(`Vercel Blob rechazó el archivo: HTTP ${blobRes.status}`);
+      console.error("[FRONTEND] Gemini rechazó la subida:", errorText);
+      throw new Error(`Google Gemini rechazó el archivo: HTTP ${blobRes.status}`);
     }
 
-    const blob = await blobRes.json();
-    console.log(`[FRONTEND] Archivo subido exitosamente a Vercel Blob: ${blob.url}`);
+    const uploadData = await blobRes.json();
+    const fileUri = uploadData.file.uri;
+    const fileName = uploadData.file.name;
+    console.log(`[FRONTEND] Archivo subido exitosamente a Gemini File API. URI: ${fileUri}`);
 
-    // 2. Llamar a nuestro backend para que lo descargue y lo mande a Gemini
+    // 3. Llamar a nuestro backend para que extraiga el texto usando la URI
     setStatus(`Procesando con Gemini 2.5 Flash...`, 60);
     console.log(`[FRONTEND] Enviando POST a /api/extract | MimeType: ${mimeType}`);
 
@@ -66,7 +67,8 @@ export async function extractFile(file) {
       },
       body: JSON.stringify({
         mimeType: mimeType,
-        blobUrl: blob.url // IMPORTANTE: Ahora enviamos la URL en vez del Base64 gigantesco
+        fileUri: fileUri,
+        fileName: fileName
       })
     });
 
