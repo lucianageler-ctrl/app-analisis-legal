@@ -17,6 +17,7 @@ module.exports = async function handler(req, res) {
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
+  console.log("API Key cargada:", apiKey ? "Sí" : "No");
 
   if (!apiKey) {
     console.error("[BACKEND] GEMINI_API_KEY no está configurada.");
