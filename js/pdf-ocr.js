@@ -18,9 +18,9 @@ export async function extractFile(file) {
     setStatus(`Subiendo ${file.name} (esto puede tomar un tiempo para archivos grandes)...`, 20);
     const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
     
-    // 1. Pedir URL de subida segura a Gemini (pasando por nuestro backend para ocultar la API Key)
-    setStatus(`Obteniendo permisos para ${safeName}...`, 10);
-    const tokenRes = await fetch('/api/upload', {
+    // 1. Iniciar subida resumible en el backend
+    setStatus(`Inicializando subida segura para ${safeName}...`, 10);
+    const startRes = await fetch('/api/start-upload', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -30,34 +30,58 @@ export async function extractFile(file) {
       })
     });
     
-    if (!tokenRes.ok) throw new Error("Fallo al inicializar subida en Gemini");
-    const { uploadUrl } = await tokenRes.json();
+    if (!startRes.ok) throw new Error("Fallo al inicializar subida en el servidor");
+    const { uploadUrl } = await startRes.json();
 
-    // 2. Subir directamente el archivo pesado a los servidores de Google Gemini (Bypass de Vercel)
-    setStatus(`Subiendo ${file.name} directamente a Google Gemini (hasta 100MB soportados)...`, 20);
-    const blobRes = await fetch(uploadUrl, {
-      method: 'PUT',
-      headers: {
-        'X-Goog-Upload-Offset': '0',
-        'X-Goog-Upload-Command': 'upload, finalize',
-        'Content-Type': mimeType
-      },
-      body: file
+    // 2. Subir en partes (chunks) de 3MB para no superar el límite de Vercel
+    const CHUNK_SIZE = 3 * 1024 * 1024; // 3MB (seguro para el límite de 4.5MB de Vercel en Base64)
+    let offset = 0;
+    let fileUri, fileName;
+
+    const chunkToBase64 = (chunk) => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(chunk);
     });
 
-    if (!blobRes.ok) {
-      const errorText = await blobRes.text();
-      console.error("[FRONTEND] Gemini rechazó la subida:", errorText);
-      throw new Error(`Google Gemini rechazó el archivo: HTTP ${blobRes.status}`);
+    while (offset < file.size) {
+      const chunk = file.slice(offset, offset + CHUNK_SIZE);
+      const isFinal = offset + CHUNK_SIZE >= file.size;
+      const base64Chunk = await chunkToBase64(chunk);
+      
+      const progress = Math.round((offset / file.size) * 100);
+      setStatus(`Subiendo archivo por partes... ${progress}% completado`, 15 + Math.floor((progress / 100) * 35));
+
+      const chunkRes = await fetch('/api/upload-chunk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          uploadUrl,
+          chunkBase64: base64Chunk,
+          offset,
+          isFinal
+        })
+      });
+
+      if (!chunkRes.ok) {
+        const errorData = await chunkRes.json();
+        throw new Error(`Error al subir la parte del archivo: ${errorData.error}`);
+      }
+
+      const data = await chunkRes.json();
+      if (isFinal) {
+        fileUri = data.fileUri;
+        fileName = data.fileName;
+      }
+
+      offset += CHUNK_SIZE;
     }
 
-    const uploadData = await blobRes.json();
-    const fileUri = uploadData.file.uri;
-    const fileName = uploadData.file.name;
-    console.log(`[FRONTEND] Archivo subido exitosamente a Gemini File API. URI: ${fileUri}`);
+    console.log(`[FRONTEND] Archivo subido exitosamente a Gemini. URI: ${fileUri}`);
 
     // 3. Llamar a nuestro backend para que extraiga el texto usando la URI
-    setStatus(`Procesando con Gemini 2.5 Flash...`, 60);
+    setStatus(`Procesando documento con Gemini 2.5 Flash...`, 60);
     console.log(`[FRONTEND] Enviando POST a /api/extract | MimeType: ${mimeType}`);
 
     const response = await fetch("/api/extract", {
