@@ -25,7 +25,7 @@ module.exports = async function handler(req, res) {
         // Configuramos los límites y permisos de la subida directa del cliente
         return {
           allowedContentTypes: ['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'application/json', 'text/plain'],
-          maximumSizeInBytes: 100 * 1024 * 1024, // 100MB
+          maximumSizeInBytes: 50 * 1024 * 1024, // 50MB (Límite máximo para cuentas gratuitas de Vercel)
         };
       }
     });
