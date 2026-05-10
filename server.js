@@ -39,6 +39,8 @@ app.post('/api/extract', upload.single('document'), async (req, res) => {
     return res.status(400).json({ error: "No se subió ningún archivo." });
   }
 
+  const mimeType = file.mimetype || 'application/pdf';
+
     // Preparar la respuesta para enviar fragmentos (evitar timeout de 100s de Render)
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Transfer-Encoding', 'chunked');
