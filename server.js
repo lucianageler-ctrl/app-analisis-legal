@@ -68,6 +68,21 @@ app.post('/api/extract', upload.single('document'), async (req, res) => {
     geminiFileToDelete = uploadData.file.name;
     console.log(`[BACKEND] Subida exitosa a Gemini. File URI: ${fileUri}`);
 
+    // Esperar a que Gemini termine de procesar el PDF (requerido para archivos grandes)
+    let fileState = uploadData.file.state;
+    let attempts = 0;
+    while (fileState === 'PROCESSING' && attempts < 20) {
+      console.log(`[BACKEND] Archivo procesándose en Gemini (Intento ${attempts + 1})... esperando 3 segundos.`);
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      const statusRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/${geminiFileToDelete}?key=${apiKey}`);
+      const statusData = await statusRes.json();
+      fileState = statusData.state;
+      if (fileState === 'FAILED') {
+        throw new Error("Google Gemini falló al indexar el documento PDF.");
+      }
+      attempts++;
+    }
+
     // 2. Extraer el texto con Gemini 2.5 Flash
     console.log("[BACKEND] Solicitando extracción de texto a Gemini...");
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
