@@ -68,7 +68,7 @@ async function handleFiles(files) {
   for (const file of incoming) {
     try {
       validateFile(file);
-      setStatus(`Preparando ${file.name}...`, 5);
+      setStatus(`Preparando ${file.name}...`, 5, "normal");
       toast(`Procesando ${file.name}...`);
 
       const payload = await extractFile(file);
@@ -77,7 +77,7 @@ async function handleFiles(files) {
         throw new Error("No se pudo extraer texto útil del archivo.");
       }
 
-      setStatus(`Procesamiento completado: ${file.name}`, 100);
+      setStatus(`✅ Procesamiento completado: ${file.name}`, 100, "success");
       addDoc(file, payload);
       toast(`Archivo procesado: ${file.name}`);
     } catch (error) {
@@ -90,7 +90,7 @@ async function handleFiles(files) {
         note: error.message
       });
 
-      setStatus(`Error: ${error.message}`, 0);
+      setStatus(`❌ Error: ${error.message}`, 0, "error");
       toast(`Error con ${file.name}`);
     }
   }

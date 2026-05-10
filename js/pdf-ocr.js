@@ -18,7 +18,7 @@ export async function extractFile(file) {
     formData.append("document", file);
     formData.append("mimeType", mimeType);
 
-    setStatus(`Enviando archivo de ${Math.round(file.size / 1024 / 1024)}MB al servidor... esto puede tardar unos minutos para archivos grandes.`, 20);
+    setStatus(`Enviando archivo de ${Math.round(file.size / 1024 / 1024)}MB al servidor... esto puede tardar unos minutos para archivos grandes.`, 20, "normal");
 
     const response = await fetch("/api/extract", {
       method: "POST",
@@ -33,7 +33,7 @@ export async function extractFile(file) {
       throw new Error(`Error en el servidor: ${errorMessage}`);
     }
 
-    setStatus('Procesando respuesta del servidor...', 90);
+    setStatus('Procesando respuesta del servidor...', 90, "normal");
     const data = await response.json();
     console.log("[FRONTEND] Respuesta recibida de la API:", data);
 

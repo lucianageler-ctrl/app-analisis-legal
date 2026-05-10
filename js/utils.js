@@ -14,10 +14,31 @@ export function toast(message) {
   }, 2600);
 }
 
-export function setStatus(message, progress = null) {
-  $("#statusText").textContent = message;
+export function setStatus(message, progress = null, type = "normal") {
+  const statusEl = $("#statusText");
+  statusEl.textContent = message;
+  
+  // Colores para el texto
+  if (type === "success") {
+    statusEl.style.color = "#10b981"; // Verde esmeralda
+  } else if (type === "error") {
+    statusEl.style.color = "#ef4444"; // Rojo
+  } else {
+    statusEl.style.color = ""; // Reset
+  }
+
   if (typeof progress === "number") {
-    $("#progressBar").style.width = `${Math.max(0, Math.min(100, progress))}%`;
+    const bar = $("#progressBar");
+    bar.style.width = `${Math.max(0, Math.min(100, progress))}%`;
+    
+    // Colores para la barra
+    if (type === "error") {
+      bar.style.backgroundColor = "#ef4444";
+    } else if (type === "success") {
+      bar.style.backgroundColor = "#10b981";
+    } else {
+      bar.style.backgroundColor = ""; // Reset
+    }
   }
 }
 
