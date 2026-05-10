@@ -1,9 +1,14 @@
 {
   "name": "app-analisis-legal",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "App de Análisis Legal con Gemini 2.5 Flash",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
   "dependencies": {
-    "@vercel/blob": "^0.23.0"
+    "express": "^4.19.0",
+    "multer": "^1.4.5-lts.1",
+    "cors": "^2.8.5"
   }
 }
