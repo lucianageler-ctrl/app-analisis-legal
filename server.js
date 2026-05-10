@@ -39,83 +39,96 @@ app.post('/api/extract', upload.single('document'), async (req, res) => {
     return res.status(400).json({ error: "No se subió ningún archivo." });
   }
 
-  const mimeType = file.mimetype;
-  let geminiFileToDelete = null;
+    // Preparar la respuesta para enviar fragmentos (evitar timeout de 100s de Render)
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Transfer-Encoding', 'chunked');
 
-  try {
-    console.log(`[BACKEND] Archivo recibido: ${file.originalname} (${file.size} bytes). Subiendo a Gemini...`);
+    // Intervalo para enviar un espacio en blanco cada 15s y mantener la conexión viva
+    const keepAliveInterval = setInterval(() => {
+      res.write(' ');
+    }, 15000);
 
-    // 1. Subir a Gemini File API
-    const uploadRes = await fetch(`https://generativelanguage.googleapis.com/upload/v1beta/files?key=${apiKey}`, {
-      method: 'POST',
-      headers: {
-        'X-Goog-Upload-Protocol': 'raw',
-        'X-Goog-Upload-Command': 'upload',
-        'X-Goog-Upload-Header-Content-Type': mimeType,
-        'Content-Type': mimeType,
-      },
-      body: file.buffer, // Buffer directo en memoria
-      duplex: 'half'
-    });
+    let geminiFileToDelete = null;
 
-    if (!uploadRes.ok) {
-      const errorText = await uploadRes.text();
-      throw new Error(`Fallo al subir a Gemini: ${errorText}`);
-    }
+    try {
+      console.log(`[BACKEND] Archivo recibido: ${file.originalname} (${file.size} bytes). Subiendo a Gemini...`);
 
-    const uploadData = await uploadRes.json();
-    const fileUri = uploadData.file.uri;
-    geminiFileToDelete = uploadData.file.name;
-    console.log(`[BACKEND] Subida exitosa a Gemini. File URI: ${fileUri}`);
+      // 1. Subir a Gemini File API
+      const uploadRes = await fetch(`https://generativelanguage.googleapis.com/upload/v1beta/files?key=${apiKey}`, {
+        method: 'POST',
+        headers: {
+          'X-Goog-Upload-Protocol': 'raw',
+          'X-Goog-Upload-Command': 'upload',
+          'X-Goog-Upload-Header-Content-Type': mimeType,
+          'Content-Type': mimeType,
+        },
+        body: file.buffer,
+        duplex: 'half'
+      });
 
-    // Esperar a que Gemini termine de procesar el PDF (requerido para archivos grandes)
-    let fileState = uploadData.file.state;
-    let attempts = 0;
-    while (fileState === 'PROCESSING' && attempts < 20) {
-      console.log(`[BACKEND] Archivo procesándose en Gemini (Intento ${attempts + 1})... esperando 3 segundos.`);
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      const statusRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/${geminiFileToDelete}?key=${apiKey}`);
-      const statusData = await statusRes.json();
-      fileState = statusData.state;
-      if (fileState === 'FAILED') {
-        throw new Error("Google Gemini falló al indexar el documento PDF.");
+      if (!uploadRes.ok) {
+        const errorText = await uploadRes.text();
+        throw new Error(`Fallo al subir a Gemini: ${errorText}`);
       }
-      attempts++;
-    }
 
-    // 2. Extraer el texto con Gemini 2.5 Flash
-    console.log("[BACKEND] Solicitando extracción de texto a Gemini...");
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              { text: "Extraer todo el texto de este documento de la forma más precisa posible sin inventar nada." },
-              { fileData: { fileUri: fileUri, mimeType: mimeType } }
-            ]
-          }
-        ]
-      })
-    });
+      const uploadData = await uploadRes.json();
+      const fileUri = uploadData.file.uri;
+      geminiFileToDelete = uploadData.file.name;
+      console.log(`[BACKEND] Subida exitosa a Gemini. File URI: ${fileUri}`);
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`Error de Gemini: ${errorData.error?.message || response.statusText}`);
-    }
+      // Esperar a que Gemini termine de procesar el PDF (requerido para archivos grandes)
+      let fileState = uploadData.file.state;
+      let attempts = 0;
+      while (fileState === 'PROCESSING' && attempts < 40) { // Aumentado a 40 intentos
+        console.log(`[BACKEND] Archivo procesándose en Gemini (Intento ${attempts + 1})... esperando 3 segundos.`);
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        const statusRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/${geminiFileToDelete}?key=${apiKey}`);
+        const statusData = await statusRes.json();
+        fileState = statusData.state;
+        if (fileState === 'FAILED') {
+          throw new Error("Google Gemini falló al indexar el documento PDF.");
+        }
+        attempts++;
+      }
 
-    const responseData = await response.json();
-    console.log("[BACKEND] Extracción completada con éxito.");
-    
-    return res.status(200).json(responseData);
+      // 2. Extraer el texto con Gemini 2.5 Flash
+      console.log("[BACKEND] Solicitando extracción de texto a Gemini...");
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                { text: "Extraer todo el texto de este documento de la forma más precisa posible sin inventar nada." },
+                { fileData: { fileUri: fileUri, mimeType: mimeType } }
+              ]
+            }
+          ]
+        })
+      });
 
-  } catch (error) {
-    console.error("[BACKEND] Error interno:", error);
-    return res.status(500).json({ error: error.message || "Error interno del servidor" });
-  } finally {
+      clearInterval(keepAliveInterval); // Detener keep-alive
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Error de Gemini: ${errorData.error?.message || response.statusText}`);
+      }
+
+      const responseData = await response.json();
+      console.log("[BACKEND] Extracción completada con éxito.");
+      
+      res.write(JSON.stringify(responseData));
+      res.end();
+
+    } catch (error) {
+      clearInterval(keepAliveInterval);
+      console.error("[BACKEND] Error interno:", error);
+      res.write(JSON.stringify({ error: error.message || "Error interno del servidor" }));
+      res.end();
+    } finally {
     // 3. Limpieza: Eliminar archivo de Gemini para no ocupar espacio
     if (geminiFileToDelete) {
       console.log(`[BACKEND] Limpiando archivo en Gemini: ${geminiFileToDelete}`);
